@@ -1,0 +1,850 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>בום ארונות תקשורת</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700&display=swap">
+<style id="main-css">
+:root{
+  --ground:#E7E8E4;       /* RAL 7035 light grey */
+  --panel:#F6F6F3;
+  --ink:#1B2126;
+  --muted:#5D666C;
+  --line:#CDD0CA;
+  --line-strong:#AEB3AC;
+  --accent:#1D5FA0;       /* CAT6 blue */
+  --accent-ink:#FFFFFF;
+  --accent-soft:#DCE6F0;
+  --earth:#7C9A1E;        /* earth-wire green */
+  --warn:#A8560E;
+  --warn-soft:#F4E4D2;
+  --danger:#B3261E;
+  --field:#FFFFFF;
+  --shadow:0 1px 2px rgba(27,33,38,.06),0 6px 24px rgba(27,33,38,.06);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#15191C;--panel:#1D2226;--ink:#E6E8E4;--muted:#9AA3A8;--line:#2E353A;--line-strong:#434C52;
+    --accent:#6FA8E0;--accent-ink:#0F1418;--accent-soft:#1E2F40;--earth:#A6C04A;--warn:#E3A15C;--warn-soft:#3A2A19;
+    --danger:#F08A82;--field:#12161A;--shadow:0 1px 2px rgba(0,0,0,.3),0 6px 24px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#15191C;--panel:#1D2226;--ink:#E6E8E4;--muted:#9AA3A8;--line:#2E353A;--line-strong:#434C52;
+  --accent:#6FA8E0;--accent-ink:#0F1418;--accent-soft:#1E2F40;--earth:#A6C04A;--warn:#E3A15C;--warn-soft:#3A2A19;
+  --danger:#F08A82;--field:#12161A;--shadow:0 1px 2px rgba(0,0,0,.3),0 6px 24px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:"IBM Plex Sans Hebrew","Arial Hebrew",Arial,sans-serif;font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:20px 60px}
+.mono,.sku{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:13px;letter-spacing:.01em}
+.sku{direction:ltr;unicode-bidi:isolate;white-space:nowrap}
+.num{font-variant-numeric:tabular-nums}
+h1,h2,h3{margin:0;text-wrap:balance}
+
+/* header */
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;border-bottom:2px solid var(--ink);padding-bottom:14px}
+.brand{display:flex;align-items:center;gap:14px}
+.rackmark{width:34px;height:44px;border:2px solid var(--ink);border-radius:3px;display:grid;grid-template-rows:repeat(5,1fr);gap:3px;padding:4px}
+.rackmark i{display:block;background:var(--ink);border-radius:1px}
+.rackmark i:nth-child(2){background:var(--accent)}
+.rackmark i:nth-child(4){background:var(--earth)}
+h1{font-size:26px;font-weight:700;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:14px}
+.status{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line-strong)}
+.dot.ok{background:var(--earth)} .dot.local{background:var(--warn)}
+
+nav.tabs{display:flex;gap:4px;margin-top:18px;flex-wrap:wrap}
+nav.tabs button{appearance:none;border:1px solid transparent;background:none;color:var(--muted);font:inherit;font-weight:600;padding:8px 14px;border-radius:6px;cursor:pointer}
+nav.tabs button[aria-selected="true"]{background:var(--ink);color:var(--ground)}
+nav.tabs button:hover:not([aria-selected="true"]){border-color:var(--line-strong);color:var(--ink)}
+nav.tabs .count{font-family:"IBM Plex Mono",monospace;font-weight:400;font-size:12px;opacity:.7;margin-inline-start:4px}
+
+section.view{margin-top:20px;display:grid;gap:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow)}
+.card-h{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.card-h h2{font-size:17px;font-weight:700}
+.card-b{padding:16px}
+.label{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em}
+
+/* forms */
+input,select,textarea{font:inherit;color:var(--ink);background:var(--field);border:1px solid var(--line-strong);border-radius:6px;padding:7px 10px;min-width:0;width:100%}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+input.qty{width:80px;text-align:center;font-variant-numeric:tabular-nums}
+.field{display:grid;gap:4px}
+.grid-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.btn{appearance:none;font:inherit;font-weight:600;font-size:14px;border-radius:6px;padding:7px 14px;cursor:pointer;border:1px solid var(--line-strong);background:var(--panel);color:var(--ink);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{border-color:transparent;background:none;color:var(--muted);padding:5px 8px}
+.btn.ghost:hover{color:var(--ink);border-color:var(--line)}
+.btn.danger{color:var(--danger)}
+.btn.arm{background:var(--danger);border-color:var(--danger);color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+/* tables */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{font-size:12px;font-weight:600;color:var(--muted);text-align:start;padding:8px 10px;border-bottom:1px solid var(--line-strong);white-space:nowrap;letter-spacing:.03em}
+td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+td.qtycell{font-weight:700;font-size:16px;text-align:center}
+.grp td{background:var(--accent-soft);font-weight:700;font-size:13px;padding-block:6px}
+.from{font-size:12.5px;color:var(--muted)}
+.chip{display:inline-block;font-size:12px;padding:1px 8px;border-radius:99px;background:var(--ground);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.chip.warn{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
+
+/* summary strip */
+.strip{display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow:hidden}
+.strip div{flex:1 1 140px;padding:10px 16px;border-inline-start:1px solid var(--line)}
+.strip div:first-child{border-inline-start:none}
+.strip b{display:block;font-size:22px;font-variant-numeric:tabular-nums;font-weight:700}
+
+/* order layout */
+.order-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:900px){.order-grid{grid-template-columns:1fr}}
+.lines{display:grid;gap:8px}
+.line{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center}
+
+/* cabinet list */
+.cabs{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.cab{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;display:grid;gap:10px;align-content:start;cursor:pointer;text-align:start;font:inherit;color:inherit}
+.cab:hover{border-color:var(--ink)}
+.cab h3{font-size:16px}
+.umeter{height:8px;border-radius:2px;background:repeating-linear-gradient(90deg,var(--line) 0 3px,transparent 3px 5px);position:relative;overflow:hidden}
+.umeter span{position:absolute;inset-block:0;inset-inline-start:0;background:var(--accent)}
+.umeter.over span{background:var(--danger)}
+
+/* editor drawer */
+.scrim{position:fixed;inset:0;background:rgba(10,14,17,.45);z-index:20;display:flex;justify-content:flex-start}
+.drawer{background:var(--panel);width:min(720px,100%);height:100%;overflow-y:auto;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.drawer-h{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:14px 16px;padding-top:calc(14px + env(safe-area-inset-top,0px));display:flex;justify-content:space-between;align-items:center;gap:10px;z-index:1}
+.drawer-b{padding:16px;display:grid;gap:18px}
+.drawer-f{margin-top:auto;position:sticky;bottom:0;background:var(--panel);border-top:1px solid var(--line);padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between}
+.eline{display:grid;grid-template-columns:minmax(0,1fr) 80px auto;gap:8px;align-items:center}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+.stat{font-size:12px;font-weight:600;padding:1px 8px;border-radius:99px;white-space:nowrap}
+.stat.done{background:color-mix(in srgb,var(--earth) 18%,transparent);color:var(--earth)}
+.stat.part{background:var(--warn-soft);color:var(--warn)}
+.stat.wait{background:var(--ground);color:var(--muted);border:1px solid var(--line)}
+tr.shipped td{color:var(--muted)}
+td.c{text-align:center}
+input.now{width:72px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums;border-color:var(--accent)}
+input.now.zero{border-color:var(--line-strong);font-weight:400;color:var(--muted)}
+.ship{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.ship:last-child{border-bottom:none}
+.shipno{font-family:"IBM Plex Mono",monospace;font-weight:500;background:var(--ink);color:var(--ground);border-radius:4px;padding:2px 7px;font-size:12px}
+.progress{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.progress span{display:block;height:100%;background:var(--earth)}
+.sendbar{display:flex;flex-wrap:wrap;gap:10px;align-items:end;justify-content:space-between;padding:14px 16px;border-top:2px solid var(--accent);background:var(--accent-soft)}
+#note-prev .dn{padding:22px}
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));inset-inline-start:50%;transform:translateX(50%);background:var(--ink);color:var(--ground);padding:9px 16px;border-radius:6px;font-weight:600;z-index:40;box-shadow:var(--shadow)}
+.hint{font-size:13px;color:var(--muted)}
+.search{max-width:320px}
+textarea.copybox{font-family:"IBM Plex Mono",monospace;font-size:12.5px;height:180px}
+@media (prefers-reduced-motion:no-preference){.drawer{animation:slide .18s ease-out}@keyframes slide{from{transform:translateX(-24px);opacity:.6}}}
+@media (max-width:560px){h1{font-size:22px}.eline{grid-template-columns:1fr 70px auto}}
+</style>
+</head>
+<body>
+
+<div class="wrap" dir="rtl" lang="he">
+  <header class="top">
+    <div class="brand">
+      <div class="rackmark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      <div>
+        <h1>בום ארונות תקשורת</h1>
+        <div class="sub">קטלוג פריטים · הגדרת ארונות · רשימת חומרים להזמנה</div>
+      </div>
+    </div>
+    <div class="status" id="status"><span class="dot"></span><span>מתחבר…</span></div>
+  </header>
+
+  <nav class="tabs" role="tablist" id="tabs">
+    <button role="tab" data-tab="order" aria-selected="true">בום להזמנה</button>
+    <button role="tab" data-tab="cabs" aria-selected="false">ארונות<span class="count" id="c-cabs"></span></button>
+    <button role="tab" data-tab="items" aria-selected="false">קטלוג פריטים<span class="count" id="c-items"></span></button>
+  </nav>
+
+  <section class="view" id="view"></section>
+</div>
+<div id="overlay"></div>
+
+<script>
+(() => {
+const UNITS = ["יח׳","סט","מטר","זוג","ק״ג","חבילה"];
+const S = { settings: { company: "" }, items: [], cabinets: [], order: null, mode: "loading", tab: "order", q: "", groupBy: "category", supplierFilter: "" };
+let db = null, dl = null, orderTimer = null, lastOrderJson = "";
+const LS = "rackbom.v1";
+const SAMPLE = {"items":[
+{"id":"i01","sku":"PP-24-C6","name":"פאץ׳ פאנל 24 פורט CAT6","category":"פאנלים","supplier":"ספק א׳ (דוגמה)","unit":"יח׳","u":1,"note":"דוגמה – ניתן לערוך או למחוק"},
+{"id":"i02","sku":"CM-1U","name":"מארגן כבלים אופקי 1U","category":"פאנלים","supplier":"ספק א׳ (דוגמה)","unit":"יח׳","u":1,"note":""},
+{"id":"i03","sku":"SH-1U-600","name":"מגש קבוע 1U עומק 600","category":"מגשים","supplier":"ספק א׳ (דוגמה)","unit":"יח׳","u":1,"note":""},
+{"id":"i04","sku":"BP-1U","name":"פאנל עיוור 1U","category":"פאנלים","supplier":"ספק א׳ (דוגמה)","unit":"יח׳","u":1,"note":""},
+{"id":"i05","sku":"FAN-4","name":"יחידת אוורור גג 4 מאווררים עם טרמוסטט","category":"אוורור","supplier":"ספק ב׳ (דוגמה)","unit":"יח׳","u":"","note":""},
+{"id":"i06","sku":"PDU-8-19","name":"מפצל חשמל 19״ 8 שקעים עם מפסק","category":"חשמל","supplier":"ספק ב׳ (דוגמה)","unit":"יח׳","u":1,"note":""},
+{"id":"i07","sku":"GB-19","name":"פס הארקה 19״","category":"חשמל","supplier":"ספק ב׳ (דוגמה)","unit":"יח׳","u":"","note":""},
+{"id":"i08","sku":"M6-SET50","name":"סט ברגים ואומים כלובים M6","category":"חיזוק","supplier":"ספק א׳ (דוגמה)","unit":"סט","u":"","note":"50 יח׳ בסט"},
+{"id":"i09","sku":"CT-V-42","name":"תעלת כבלים אנכית 42U","category":"חיזוק","supplier":"ספק א׳ (דוגמה)","unit":"יח׳","u":"","note":""},
+{"id":"i10","sku":"CAS-4","name":"סט גלגלים (4) עם בלם","category":"חיזוק","supplier":"ספק א׳ (דוגמה)","unit":"סט","u":"","note":""}],
+"cabinets":[
+{"id":"c01","sku":"RK-42-6080","name":"ארון תקשורת 42U 600×800","sizeU":42,"desc":"דלת זכוכית, RAL 7035 (דוגמה)","lines":[{"itemId":"i01","qty":4},{"itemId":"i02","qty":4},{"itemId":"i03","qty":2},{"itemId":"i04","qty":6},{"itemId":"i05","qty":1},{"itemId":"i06","qty":2},{"itemId":"i07","qty":1},{"itemId":"i08","qty":2},{"itemId":"i09","qty":2},{"itemId":"i10","qty":1}]},
+{"id":"c02","sku":"WM-12-6045","name":"ארון תלייה 12U 600×450","sizeU":12,"desc":"ארון קיר (דוגמה)","lines":[{"itemId":"i01","qty":1},{"itemId":"i02","qty":1},{"itemId":"i03","qty":1},{"itemId":"i06","qty":1},{"itemId":"i08","qty":1}]}],
+"order":{"title":"פרויקט לדוגמה","number":"2026-101","date":"","manufacturer":"","lines":[{"cabinetId":"c01","qty":3},{"cabinetId":"c02","qty":2}],"extras":[{"itemId":"i08","qty":2}]}};
+
+
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const rid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+const byId = (arr, id) => arr.find(x => x.id === id);
+const today = () => new Date().toISOString().slice(0, 10);
+const blankOrder = () => ({ title: "", number: "", date: today(), manufacturer: "", lines: [], extras: [], shipments: [], sendNow: {} });
+const collator = new Intl.Collator("he", { numeric: true });
+
+function toast(msg) {
+  const t = document.createElement("div"); t.className = "toast"; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2200);
+}
+function setStatus() {
+  const el = $("#status");
+  if (S.mode === "db") el.innerHTML = '<span class="dot ok"></span><span>נשמר בענן · משותף</span>';
+  else if (S.mode === "local") el.innerHTML = '<span class="dot local"></span><span>נשמר במחשב זה (בדפדפן)</span>';
+  else el.innerHTML = '<span class="dot"></span><span>מתחבר…</span>';
+}
+
+/* ---------- storage ---------- */
+function saveLocal() {
+  if (S.mode !== "local") return;
+  try { localStorage.setItem(LS, JSON.stringify({ items: S.items, cabinets: S.cabinets, order: S.order, settings: S.settings })); } catch (e) {}
+}
+async function putItem(it) {
+  if (S.mode === "db") { const { id, ...body } = it; await db.collection("items").doc(id).set(body); }
+  else { const i = S.items.findIndex(x => x.id === it.id); i >= 0 ? S.items[i] = it : S.items.push(it); saveLocal(); render(); }
+}
+async function delItem(id) {
+  if (S.mode === "db") await db.collection("items").doc(id).delete();
+  else { S.items = S.items.filter(x => x.id !== id); saveLocal(); render(); }
+}
+async function putCab(c) {
+  if (S.mode === "db") { const { id, ...body } = c; await db.collection("cabinets").doc(id).set(body); }
+  else { const i = S.cabinets.findIndex(x => x.id === c.id); i >= 0 ? S.cabinets[i] = c : S.cabinets.push(c); saveLocal(); render(); }
+}
+async function delCab(id) {
+  if (S.mode === "db") await db.collection("cabinets").doc(id).delete();
+  else { S.cabinets = S.cabinets.filter(x => x.id !== id); saveLocal(); render(); }
+}
+function saveOrderSoon() {
+  if (S.mode === "local") { saveLocal(); return; }
+  clearTimeout(orderTimer);
+  orderTimer = setTimeout(async () => {
+    const j = JSON.stringify(S.order);
+    if (j === lastOrderJson) return;
+    lastOrderJson = j;
+    try { await db.doc("orders/current").set(S.order); } catch (e) { toast("ההזמנה לא נשמרה: אין הרשאת עריכה"); }
+  }, 700);
+}
+
+async function boot() {
+  try {
+    const c = window.claude;
+    if (c && c.use) {
+      [db, dl] = await Promise.all([c.use("db"), c.use("downloads")]);
+    }
+  } catch (e) { db = null; }
+  if (db) {
+    S.mode = "db";
+    const sort = arr => arr.sort((a, b) => collator.compare(a.sku || "", b.sku || ""));
+    db.collection("items").onSnapshot(s => { S.items = sort(s.docs.map(d => ({ id: d.id, ...d.data() }))); render(); }, () => toast("שגיאה בטעינת הקטלוג"));
+    db.collection("cabinets").onSnapshot(s => { S.cabinets = sort(s.docs.map(d => ({ id: d.id, ...d.data() }))); render(); }, () => toast("שגיאה בטעינת הארונות"));
+    db.doc("settings/main").onSnapshot(s => { if (s.exists) S.settings = { company: "", ...s.data() }; });
+    db.doc("orders/current").onSnapshot(s => {
+      const incoming = s.exists ? { ...blankOrder(), ...s.data() } : blankOrder();
+      const j = JSON.stringify(incoming);
+      if (j === lastOrderJson && S.order) return;
+      if (document.activeElement && document.activeElement.closest && document.activeElement.closest("[data-order]") && S.order) return;
+      lastOrderJson = j; S.order = JSON.parse(j); render();
+    });
+  } else {
+    S.mode = "local";
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(LS) || "null"); } catch (e) {}
+    if (saved) { S.settings = { company: "", ...(saved.settings || {}) }; S.items = saved.items || []; S.cabinets = saved.cabinets || []; S.order = { ...blankOrder(), ...(saved.order || {}) }; }
+    else { S.items = SAMPLE.items; S.cabinets = SAMPLE.cabinets; S.order = { ...SAMPLE.order, date: today() }; saveLocal(); }
+  }
+  setStatus(); render();
+}
+
+/* ---------- BOM ---------- */
+function cabU(c) {
+  return (c.lines || []).reduce((s, l) => { const it = byId(S.items, l.itemId); return s + (it && it.u ? Number(it.u) * Number(l.qty || 0) : 0); }, 0);
+}
+function computeBom() {
+  const o = S.order || blankOrder();
+  const map = new Map();
+  const add = (itemId, q, src) => {
+    if (!q) return;
+    const r = map.get(itemId) || { itemId, qty: 0, from: [] };
+    r.qty += q; r.from.push(src); map.set(itemId, r);
+  };
+  let cabCount = 0;
+  for (const l of o.lines || []) {
+    const c = byId(S.cabinets, l.cabinetId); const n = Number(l.qty) || 0;
+    if (!c || !n) continue; cabCount += n;
+    for (const cl of c.lines || []) add(cl.itemId, (Number(cl.qty) || 0) * n, `${c.sku || c.name} ×${n}`);
+  }
+  for (const e of o.extras || []) add(e.itemId, Number(e.qty) || 0, "פריט בודד");
+  const shippedMap = {};
+  for (const sh of o.shipments || []) for (const [id, q] of Object.entries(sh.lines || {})) shippedMap[id] = (shippedMap[id] || 0) + (Number(q) || 0);
+  const sn = o.sendNow || {};
+  const rows = [...map.values()].map(r => {
+    const shipped = shippedMap[r.itemId] || 0, remaining = Math.max(0, r.qty - shipped);
+    const now = sn[r.itemId] === undefined || sn[r.itemId] === "" ? remaining : Math.min(remaining, Math.max(0, Number(sn[r.itemId]) || 0));
+    return { ...r, item: byId(S.items, r.itemId), shipped, remaining, now };
+  });
+  const missing = rows.filter(r => !r.item).length;
+  const good = rows.filter(r => r.item);
+  const key = r => S.groupBy === "supplier" ? (r.item.supplier || "ללא ספק") : (r.item.category || "ללא קטגוריה");
+  good.sort((a, b) => collator.compare(key(a), key(b)) || collator.compare(a.item.sku || "", b.item.sku || ""));
+  const filtered = S.supplierFilter ? good.filter(r => (r.item.supplier || "") === S.supplierFilter) : good;
+  return { rows: filtered, all: good, missing, cabCount, key };
+}
+
+function bomText() {
+  const o = S.order, { rows } = computeBom();
+  const head = [
+    `רשימת חומרים${o.title ? " – " + o.title : ""}`,
+    o.number ? `הזמנה מס׳ ${o.number}` : "",
+    o.manufacturer ? `לכבוד: ${o.manufacturer}` : "",
+    `תאריך: ${o.date || today()}`,
+    S.supplierFilter ? `ספק: ${S.supplierFilter}` : "",
+    ""
+  ].filter((x, i, a) => x || i === a.length - 1);
+  const cabLines = (o.lines || []).map(l => { const c = byId(S.cabinets, l.cabinetId); return c && l.qty ? `• ${c.sku} ${c.name} – ${l.qty} יח׳` : ""; }).filter(Boolean);
+  const body = rows.map(r => `${r.item.sku}  |  ${r.item.name}  |  ${r.qty} ${r.item.unit || "יח׳"}`);
+  return [...head, cabLines.length ? "ארונות בהזמנה:" : "", ...cabLines, cabLines.length ? "" : "", "מק״ט  |  תיאור  |  כמות", ...body].filter((x, i, a) => !(x === "" && a[i - 1] === "")).join("\n");
+}
+function bomCsv() {
+  const o = S.order, { rows } = computeBom();
+  const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const lines = [
+    [q("רשימת חומרים"), q(o.title)], [q("מס׳ הזמנה"), q(o.number)], [q("לכבוד"), q(o.manufacturer)], [q("תאריך"), q(o.date)], [],
+    ["מק״ט", "תיאור", "קטגוריה", "ספק", "יחידה", "כמות", "מקור"].map(q),
+    ...rows.map(r => [r.item.sku, r.item.name, r.item.category, r.item.supplier, r.item.unit || "יח׳", r.qty, r.from.join("; ")].map(q))
+  ];
+  return "﻿" + lines.map(l => l.join(",")).join("\r\n");
+}
+
+function shipIndex(id) { return (S.order.shipments || []).findIndex(x => x.id === id); }
+function shipRemainingAfter(idx) {
+  // what is still missing after shipments 0..idx
+  const o = S.order, { all } = computeBom();
+  const upto = {};
+  (o.shipments || []).slice(0, idx + 1).forEach(sh => Object.entries(sh.lines || {}).forEach(([id, q]) => upto[id] = (upto[id] || 0) + (Number(q) || 0)));
+  return all.map(r => ({ r, left: Math.max(0, r.qty - (upto[r.itemId] || 0)) })).filter(x => x.left > 0);
+}
+function shipLines(sh) {
+  return Object.entries(sh.lines || {}).map(([id, q]) => ({ item: byId(S.items, id), q: Number(q) || 0 })).filter(x => x.item && x.q > 0)
+    .sort((a, b) => collator.compare(a.item.sku || "", b.item.sku || ""));
+}
+function shipText(id) {
+  const o = S.order, idx = shipIndex(id), sh = o.shipments[idx];
+  const sent = shipLines(sh), left = shipRemainingAfter(idx);
+  const out = [
+    `תעודת משלוח מס׳ ${idx + 1}${o.number ? " · הזמנה " + o.number : ""}${o.title ? " – " + o.title : ""}`,
+    o.manufacturer ? `לכבוד: ${o.manufacturer}` : null,
+    `תאריך משלוח: ${sh.date}`, sh.note ? `הערה: ${sh.note}` : null, "",
+    "נשלח עכשיו:", "מק״ט  |  תיאור  |  כמות",
+    ...sent.map(x => `${x.item.sku}  |  ${x.item.name}  |  ${x.q} ${x.item.unit || "יח׳"}`), ""
+  ];
+  if (left.length) out.push("⚠ משלוח חלקי – חוסרים שיסופקו במשלוח הבא:", "מק״ט  |  תיאור  |  נדרש  |  סופק  |  חסר",
+    ...left.map(x => `${x.r.item.sku}  |  ${x.r.item.name}  |  ${x.r.qty}  |  ${x.r.qty - x.left}  |  ${x.left} ${x.r.item.unit || "יח׳"}`));
+  else out.push("✔ ההזמנה הושלמה – כל הפריטים נשלחו.");
+  return out.filter(x => x !== null).join("\n");
+}
+function shipCsv(id) {
+  const o = S.order, idx = shipIndex(id), sh = o.shipments[idx];
+  const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const lines = [[q("תעודת משלוח"), q(idx + 1)], [q("מס׳ הזמנה"), q(o.number)], [q("פרויקט"), q(o.title)], [q("לכבוד"), q(o.manufacturer)], [q("תאריך משלוח"), q(sh.date)], [q("הערה"), q(sh.note)], [],
+    ["מצב", "מק״ט", "תיאור", "יחידה", "כמות"].map(q),
+    ...shipLines(sh).map(x => [q("נשלח"), q(x.item.sku), q(x.item.name), q(x.item.unit || "יח׳"), q(x.q)]),
+    ...shipRemainingAfter(idx).map(x => [q("יושלם בהמשך"), q(x.r.item.sku), q(x.r.item.name), q(x.r.item.unit || "יח׳"), q(x.left)])];
+  return "\uFEFF" + lines.map(l => l.join(",")).join("\r\n");
+}
+const NOTE_CSS = `
+.dn{direction:rtl;font-family:"IBM Plex Sans Hebrew",Arial,sans-serif;color:#111;background:#fff;padding:28px;max-width:800px;margin:0 auto;font-size:13.5px;line-height:1.45}
+.dn *{box-sizing:border-box}
+.dn-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:3px solid #111;padding-bottom:12px;flex-wrap:wrap}
+.dn-title{font-size:22px;font-weight:700;margin:0}
+.dn-no{font-family:"IBM Plex Mono",monospace;font-size:15px;direction:ltr;display:inline-block}
+.dn-from{white-space:pre-line;color:#333;min-width:180px}
+.dn-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:6px 18px;margin:14px 0;padding:10px 12px;background:#f2f3f1;border-radius:4px}
+.dn-meta b{display:block;font-size:11px;color:#666;font-weight:600;letter-spacing:.04em}
+.dn h3{font-size:15px;margin:18px 0 6px}
+.dn table{width:100%;border-collapse:collapse}
+.dn th{background:#111;color:#fff;font-size:12px;font-weight:600;text-align:start;padding:6px 8px}
+.dn td{border-bottom:1px solid #ccc;padding:6px 8px;vertical-align:top}
+.dn td.n{text-align:center;font-variant-numeric:tabular-nums;font-weight:700}
+.dn .sku{font-family:"IBM Plex Mono",monospace;direction:ltr;unicode-bidi:isolate;white-space:nowrap;font-size:12px}
+.dn-short{border:2px solid #b3261e;border-radius:4px;margin-top:18px}
+.dn-short .bar{background:#b3261e;color:#fff;padding:8px 12px;font-weight:700}
+.dn-short p{margin:8px 12px}
+.dn-short th{background:#f6dcda;color:#6b1510}
+.dn-short td.miss{color:#b3261e}
+.dn-ok{margin-top:18px;border:2px solid #4c6b12;color:#4c6b12;padding:10px 12px;border-radius:4px;font-weight:700}
+.dn-sum{margin-top:12px;font-weight:600}
+.dn-note{margin-top:10px;padding:8px 12px;background:#f2f3f1;border-radius:4px}
+.dn-sign{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:40px}
+.dn-sign div{border-top:1px solid #111;padding-top:4px;font-size:12px;color:#444}
+`;
+function noteMarkup(id) {
+  const o = S.order, idx = shipIndex(id), sh = o.shipments[idx];
+  const sent = shipLines(sh), left = shipRemainingAfter(idx), { all } = computeBom();
+  const totAll = all.reduce((s, r) => s + r.qty, 0), totLeft = left.reduce((s, x) => s + x.left, 0);
+  const no = `${o.number || "—"}/${idx + 1}`;
+  const cabs = (o.lines || []).map(l => { const c = byId(S.cabinets, l.cabinetId); return c && l.qty ? `${esc(c.sku)} × ${l.qty}` : ""; }).filter(Boolean).join(" · ");
+  return `<div class="dn">
+    <div class="dn-head"><div><h1 class="dn-title">תעודת משלוח</h1><div>מס׳ <span class="dn-no">${esc(no)}</span>${left.length ? " · <b style=\"color:#b3261e\">משלוח חלקי</b>" : ""}</div></div>
+      <div class="dn-from">${esc(S.settings.company || "")}</div></div>
+    <div class="dn-meta">
+      <div><b>לכבוד</b>${esc(o.manufacturer || "—")}</div>
+      <div><b>תאריך משלוח</b>${esc(sh.date)}</div>
+      <div><b>הזמנה</b>${esc(o.number || "—")}</div>
+      <div><b>פרויקט</b>${esc(o.title || "—")}</div>
+      ${cabs ? `<div style="grid-column:1/-1"><b>ארונות בהזמנה</b><span class="sku">${cabs}</span></div>` : ""}
+    </div>
+    <h3>פריטים שסופקו במשלוח זה</h3>
+    <table><thead><tr><th>#</th><th>מק״ט</th><th>תיאור</th><th style="text-align:center">כמות</th><th>יח׳</th></tr></thead>
+    <tbody>${sent.map((x, i) => `<tr><td>${i + 1}</td><td><span class="sku">${esc(x.item.sku)}</span></td><td>${esc(x.item.name)}</td><td class="n">${x.q}</td><td>${esc(x.item.unit || "יח׳")}</td></tr>`).join("")}</tbody></table>
+    ${left.length ? `<div class="dn-short"><div class="bar">⚠ חוסרים – ${left.length} פריטים (${totLeft} יח׳) לא סופקו ויסופקו במשלוח הבא</div>
+      <p>נא להתחיל בהרכבה עם הקיים. הפריטים הבאים חסרים כרגע ויושלמו בהמשך:</p>
+      <table><thead><tr><th>מק״ט</th><th>תיאור</th><th style="text-align:center">נדרש</th><th style="text-align:center">סופק עד כה</th><th style="text-align:center">חסר</th></tr></thead>
+      <tbody>${left.map(x => `<tr><td><span class="sku">${esc(x.r.item.sku)}</span></td><td>${esc(x.r.item.name)}</td><td class="n">${x.r.qty}</td><td class="n">${x.r.qty - x.left}</td><td class="n miss">${x.left} ${esc(x.r.item.unit || "יח׳")}</td></tr>`).join("")}</tbody></table></div>`
+      : `<div class="dn-ok">✔ משלוח משלים – כל פריטי ההזמנה סופקו.</div>`}
+    <div class="dn-sum">סה״כ סופק עד כה בהזמנה: ${totAll - totLeft} מתוך ${totAll} יחידות.</div>
+    ${sh.note ? `<div class="dn-note"><b>הערה:</b> ${esc(sh.note)}</div>` : ""}
+    <div class="dn-sign"><div>שם המקבל</div><div>חתימה</div><div>תאריך קבלה</div></div>
+  </div>`;
+}
+function noteDoc(id) {
+  const idx = shipIndex(id);
+  return `<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>תעודת משלוח ${esc((S.order.number || "") + "/" + (idx + 1))}</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Hebrew:wght@400;600;700&display=swap">
+<style>body{margin:0;background:#e7e8e4}${NOTE_CSS}.pbar{text-align:center;padding:14px}.pbar button{font:inherit;font-weight:700;padding:9px 18px;border-radius:6px;border:0;background:#1d5fa0;color:#fff;cursor:pointer}
+@media print{body{background:#fff}.pbar{display:none}.dn{padding:0;max-width:none}@page{size:A4;margin:14mm}}</style></head>
+<body><div class="pbar"><button onclick="print()">הדפס / שמור כ-PDF</button></div>${noteMarkup(id)}</body></html>`;
+}
+function noteFileName(id) {
+  const idx = shipIndex(id);
+  return `תעודת-משלוח-${(S.order.number || "order").replace(/[\\/:*?"<>|]/g, "-")}-${idx + 1}.html`;
+}
+function openNote(id) {
+  draft = { type: "note", id };
+  const standalone = !window.claude;
+  drawer(`תעודת משלוח #${shipIndex(id) + 1}`, `
+    <label class="field"><span class="label">פרטי השולח (מופיעים בראש התעודה)</span>
+      <textarea id="set-company" rows="2" placeholder="שם החברה, כתובת, טלפון">${esc(S.settings.company || "")}</textarea></label>
+    <div style="border:1px solid var(--line);border-radius:6px;overflow:auto;background:#fff" id="note-prev">${noteMarkup(id)}</div>`,
+    `<div class="row">
+      ${standalone ? `<button class="btn primary" data-act="note-print" data-id="${id}">הדפס / שמור כ-PDF</button>` : ""}
+      <button class="btn ${standalone ? "" : "primary"}" data-act="note-dl" data-id="${id}">הורד תעודה</button>
+      <button class="btn" data-act="ship-copy" data-id="${id}">העתק כטקסט</button>
+      <button class="btn" data-act="ship-csv" data-id="${id}">CSV</button>
+    </div><button class="btn" data-act="close">סגור</button>`);
+  const d = document.querySelector(".drawer"); if (d) d.style.width = "min(900px,100%)";
+}
+async function saveSettings() {
+  if (S.mode === "db") { try { await db.doc("settings/main").set(S.settings); } catch (e) { toast("פרטי השולח לא נשמרו"); } }
+  else saveLocal();
+}
+async function saveFile(name, data) {
+  if (!dl) {
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([data], { type: (name.endsWith(".html") ? "text/html" : "text/csv") + ";charset=utf-8" })); a.download = name;
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); toast("הקובץ ירד"); return;
+  }
+  try { await dl.save({ filename: name, data }); toast("הקובץ נשמר"); }
+  catch (err) { if (err && err.code !== "declined") toast("לא ניתן להוריד קובץ כאן"); }
+}
+async function copyText(txt) {
+  const wrap = $("#copywrap"), box = $("#copybox");
+  try { await navigator.clipboard.writeText(txt); toast("הועתק – הדבק בווטסאפ או במייל"); }
+  catch (err) { if (box) { box.value = txt; wrap.hidden = false; box.focus(); box.select(); } toast("סמן והעתק את הטקסט"); }
+}
+
+/* ---------- render ---------- */
+function render() {
+  setStatus();
+  $("#c-cabs").textContent = S.cabinets.length || "";
+  $("#c-items").textContent = S.items.length || "";
+  document.querySelectorAll("#tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === S.tab));
+  const active = document.activeElement; const aid = active && active.id; const sel = active && active.selectionStart;
+  const v = $("#view");
+  if (!S.order) { v.innerHTML = '<div class="empty">טוען נתונים…</div>'; return; }
+  v.innerHTML = S.tab === "order" ? viewOrder() : S.tab === "cabs" ? viewCabs() : viewItems();
+  if (aid) { const el = document.getElementById(aid); if (el) { el.focus(); try { if (sel != null) el.setSelectionRange(sel, sel); } catch (e) {} } }
+}
+
+function cabOptions(sel) {
+  return '<option value="">בחר ארון…</option>' + S.cabinets.map(c => `<option value="${c.id}" ${c.id === sel ? "selected" : ""}>${esc(c.sku)} · ${esc(c.name)}</option>`).join("");
+}
+function itemOptions(sel) {
+  return '<option value="">בחר פריט…</option>' + S.items.map(i => `<option value="${i.id}" ${i.id === sel ? "selected" : ""}>${esc(i.sku)} · ${esc(i.name)}</option>`).join("");
+}
+
+function viewOrder() {
+  const o = S.order;
+  const { rows, all, missing, cabCount, key } = computeBom();
+  const suppliers = [...new Set(all.map(r => r.item.supplier).filter(Boolean))].sort(collator.compare);
+  const totalUnits = rows.reduce((s, r) => s + r.qty, 0);
+  const totShipped = all.reduce((s, r) => s + Math.min(r.qty, r.shipped), 0), totAll = all.reduce((s, r) => s + r.qty, 0);
+  const openRows = rows.filter(r => r.remaining > 0);
+  const nowUnits = rows.reduce((s, r) => s + r.now, 0), nowLines = rows.filter(r => r.now > 0).length;
+  const shortLines = rows.filter(r => r.remaining > 0 && r.now < r.remaining).length;
+  const ships = o.shipments || [];
+  let lastKey = null, tbody = "";
+  for (const r of rows) {
+    const k = key(r);
+    if (k !== lastKey) { tbody += `<tr class="grp"><td colspan="8">${esc(k)}</td></tr>`; lastKey = k; }
+    const unit = esc(r.item.unit || "יח׳");
+    const st = r.remaining === 0 ? '<span class="stat done">הושלם</span>' : r.shipped > 0 ? '<span class="stat part">חלקי</span>' : '<span class="stat wait">טרם נשלח</span>';
+    tbody += `<tr class="${r.remaining === 0 ? "shipped" : ""}"><td><span class="sku">${esc(r.item.sku)}</span></td><td>${esc(r.item.name)}<div class="from">${esc(r.from.join(" · "))}</div></td>
+      <td class="qtycell num">${r.qty} <span class="from">${unit}</span></td>
+      <td class="c num">${r.shipped || "–"}</td>
+      <td class="c num" style="font-weight:600">${r.remaining || "–"}</td>
+      <td class="c">${r.remaining ? `<input class="now ${r.now ? "" : "zero"}" type="number" min="0" max="${r.remaining}" inputmode="numeric" data-order data-kind="now" data-item="${r.itemId}" id="now-${r.itemId}" value="${r.now}" aria-label="כמות לשליחה עכשיו">` : ""}</td>
+      <td>${st}</td></tr>`;
+  }
+  const shipList = ships.map((sh, i) => {
+    const n = shipLines(sh).reduce((s, x) => s + x.q, 0);
+    return `<div class="ship"><span class="shipno">#${i + 1}</span><div><div style="font-weight:600">${esc(sh.date)} · ${n} יחידות</div>${sh.note ? `<div class="from">${esc(sh.note)}</div>` : ""}</div>
+      <div class="row" style="gap:4px"><button class="btn ghost" data-act="ship-note" data-id="${sh.id}">תעודה</button><button class="btn ghost" data-act="ship-copy" data-id="${sh.id}">העתק</button><button class="btn ghost" data-act="ship-csv" data-id="${sh.id}">CSV</button><button class="btn ghost danger" data-act="ship-del" data-id="${sh.id}" aria-label="בטל משלוח">✕</button></div></div>`;
+  }).join("");
+  const lines = (o.lines || []).map((l, i) => `
+    <div class="line"><select data-order data-kind="line" data-i="${i}" id="ol-c-${i}" aria-label="ארון">${cabOptions(l.cabinetId)}</select>
+    <input class="qty" type="number" min="0" inputmode="numeric" data-order data-kind="lineq" data-i="${i}" id="ol-q-${i}" value="${esc(l.qty)}" aria-label="כמות">
+    <button class="btn ghost" data-act="rm-line" data-i="${i}" aria-label="הסר">✕</button></div>`).join("");
+  const extras = (o.extras || []).map((l, i) => `
+    <div class="line"><select data-order data-kind="extra" data-i="${i}" id="oe-c-${i}" aria-label="פריט">${itemOptions(l.itemId)}</select>
+    <input class="qty" type="number" min="0" inputmode="numeric" data-order data-kind="extraq" data-i="${i}" id="oe-q-${i}" value="${esc(l.qty)}" aria-label="כמות">
+    <button class="btn ghost" data-act="rm-extra" data-i="${i}" aria-label="הסר">✕</button></div>`).join("");
+
+  return `
+  <div class="strip">
+    <div><span class="label">ארונות בהזמנה</span><b>${cabCount}</b></div>
+    <div><span class="label">שורות בבום</span><b>${rows.length}</b></div>
+    <div><span class="label">סה״כ יחידות</span><b>${totalUnits}</b></div>
+    <div><span class="label">נשלחו לספק ההרכבה</span><b>${totShipped}/${totAll}</b><div class="progress" style="margin-top:6px"><span style="width:${totAll ? totShipped / totAll * 100 : 0}%"></span></div></div>
+    <div><span class="label">משלוחים</span><b>${ships.length}</b></div>
+  </div>
+  <div class="order-grid">
+    <div class="card" data-order>
+      <div class="card-h"><h2>פרטי ההזמנה</h2><button class="btn ghost" data-act="new-order" id="btn-new-order">הזמנה חדשה</button></div>
+      <div class="card-b" style="display:grid;gap:18px">
+        <div class="grid-form">
+          <label class="field"><span class="label">פרויקט / לקוח</span><input id="o-title" data-order data-kind="f" data-f="title" value="${esc(o.title)}" placeholder="לדוגמה: חוות שרתים – בניין B"></label>
+          <label class="field"><span class="label">מס׳ הזמנה</span><input id="o-number" class="mono" data-order data-kind="f" data-f="number" value="${esc(o.number)}"></label>
+          <label class="field"><span class="label">לכבוד (יצרן הלוחות)</span><input id="o-man" data-order data-kind="f" data-f="manufacturer" value="${esc(o.manufacturer)}"></label>
+          <label class="field"><span class="label">תאריך</span><input id="o-date" type="date" data-order data-kind="f" data-f="date" value="${esc(o.date)}"></label>
+        </div>
+        <div style="display:grid;gap:8px">
+          <span class="label">ארונות</span>
+          <div class="lines">${lines || '<div class="hint">עדיין לא נבחרו ארונות.</div>'}</div>
+          <div><button class="btn" data-act="add-line" ${S.cabinets.length ? "" : "disabled"}>+ הוסף ארון</button></div>
+        </div>
+        <div style="display:grid;gap:8px">
+          <span class="label">פריטים בודדים (מחוץ לארון)</span>
+          <div class="lines">${extras || '<div class="hint">רזרבות, תוספות ללקוח וכד׳.</div>'}</div>
+          <div><button class="btn" data-act="add-extra" ${S.items.length ? "" : "disabled"}>+ הוסף פריט</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>משלוחים לספק ההרכבה</h2></div>
+      <div class="card-b">
+        ${ships.length ? shipList : '<div class="hint">עדיין לא נרשמו משלוחים. בטבלה למטה קובעים מה יוצא עכשיו לפי מה שיש במלאי, ומה שחסר יישאר פתוח למשלוח הבא.</div>'}
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-h">
+      <h2>רשימת חומרים ומצב משלוח</h2>
+      <div class="row">
+        <select id="groupBy" style="width:auto" aria-label="קיבוץ"><option value="category" ${S.groupBy === "category" ? "selected" : ""}>לפי קטגוריה</option><option value="supplier" ${S.groupBy === "supplier" ? "selected" : ""}>לפי ספק</option></select>
+        <select id="supFilter" style="width:auto" aria-label="ספק"><option value="">כל הספקים</option>${suppliers.map(s => `<option ${s === S.supplierFilter ? "selected" : ""}>${esc(s)}</option>`).join("")}</select>
+      </div>
+    </div>
+    ${missing ? `<div class="card-b" style="padding-bottom:0"><span class="chip warn">${missing} פריטים בארונות נמחקו מהקטלוג ולא נכללו</span></div>` : ""}
+    ${rows.length ? `<div class="tw"><table><thead><tr><th>מק״ט</th><th>תיאור</th><th style="text-align:center">נדרש</th><th style="text-align:center">נשלח</th><th style="text-align:center">יתרה</th><th style="text-align:center">לשליחה עכשיו</th><th>מצב</th></tr></thead><tbody>${tbody}</tbody></table></div>`
+      : '<div class="empty">בחר ארונות וכמויות למעלה, והבום יחושב כאן אוטומטית.</div>'}
+    ${openRows.length ? `<div class="sendbar">
+      <div style="display:grid;gap:6px">
+        <strong>משלוח #${ships.length + 1}: ${nowUnits} יחידות ב-${nowLines} שורות${shortLines ? ` · <span style="color:var(--warn)">${shortLines} שורות יושלמו בהמשך</span>` : ""}</strong>
+        <span class="hint">הורד את הכמות בשורות שאין מספיק במלאי. מה שלא יוצא עכשיו יישאר ביתרה.${S.supplierFilter ? " נשלחות רק השורות של הספק המסונן." : ""}</span>
+        <div class="row"><button class="btn ghost" data-act="now-all">הכל לפי היתרה</button><button class="btn ghost" data-act="now-zero">אפס הכל</button></div>
+      </div>
+      <div class="row" style="align-items:end">
+        <label class="field"><span class="label">תאריך משלוח</span><input id="sh-date" type="date" value="${esc(S.shipDate || today())}"></label>
+        <label class="field"><span class="label">הערה</span><input id="sh-note" value="${esc(S.shipNote || "")}" placeholder="נהג, תעודה, השלמה…"></label>
+        <button class="btn primary" data-act="ship" ${nowUnits ? "" : "disabled"}>רשום משלוח והפק תעודה</button>
+      </div>
+    </div>` : rows.length ? '<div class="sendbar"><strong style="color:var(--earth)">✔ כל הפריטים נשלחו – ההזמנה הושלמה.</strong></div>' : ""}
+    <div class="card-b row" style="border-top:1px solid var(--line);justify-content:space-between">
+      <span class="hint">הבום המלא של ההזמנה, בלי קשר למשלוחים.</span>
+      <div class="row">
+        <button class="btn" data-act="copy" ${rows.length ? "" : "disabled"}>העתק בום מלא</button>
+        <button class="btn" data-act="csv" ${rows.length ? "" : "disabled"}>הורד בום לאקסל (CSV)</button>
+      </div>
+    </div>
+    <div class="card-b" id="copywrap" hidden><textarea class="copybox" id="copybox" readonly dir="rtl"></textarea></div>
+  </div>`;
+}
+
+function viewCabs() {
+  if (!S.cabinets.length) return `<div class="card"><div class="empty">אין עדיין ארונות. הגדר ארון, תן לו מק״ט ורשום את האביזרים שבו.<br><br><button class="btn primary" data-act="new-cab">+ ארון חדש</button></div></div>`;
+  const cards = S.cabinets.map(c => {
+    const size = Number(c.sizeU) || 0, used = cabU(c), pct = size ? Math.min(100, used / size * 100) : 0;
+    const n = (c.lines || []).length, pcs = (c.lines || []).reduce((s, l) => s + (Number(l.qty) || 0), 0);
+    return `<button class="cab" data-act="edit-cab" data-id="${c.id}">
+      <div class="row" style="justify-content:space-between"><span class="sku">${esc(c.sku)}</span>${size ? `<span class="chip">${size}U</span>` : ""}</div>
+      <h3>${esc(c.name)}</h3>
+      ${c.desc ? `<div class="hint">${esc(c.desc)}</div>` : ""}
+      ${size ? `<div><div class="umeter ${used > size ? "over" : ""}"><span style="width:${pct}%"></span></div><div class="from num" style="margin-top:4px">תפוסה ${used}/${size}U</div></div>` : ""}
+      <div class="from">${n} סוגי אביזרים · ${pcs} פריטים</div>
+    </button>`;
+  }).join("");
+  return `<div class="row" style="justify-content:space-between"><span class="hint">לחץ על ארון כדי לערוך את רשימת האביזרים שלו.</span><button class="btn primary" data-act="new-cab">+ ארון חדש</button></div><div class="cabs">${cards}</div>`;
+}
+
+function viewItems() {
+  const q = S.q.trim().toLowerCase();
+  const list = S.items.filter(i => !q || [i.sku, i.name, i.category, i.supplier].some(v => String(v || "").toLowerCase().includes(q)));
+  const usage = id => S.cabinets.filter(c => (c.lines || []).some(l => l.itemId === id)).length;
+  const dupe = new Set(); const seen = new Set();
+  S.items.forEach(i => { const k = (i.sku || "").trim().toLowerCase(); if (k && seen.has(k)) dupe.add(k); seen.add(k); });
+  const rows = list.map(i => `<tr style="cursor:pointer" data-act="edit-item" data-id="${i.id}">
+    <td><span class="sku">${esc(i.sku)}</span>${dupe.has((i.sku || "").trim().toLowerCase()) ? ' <span class="chip warn">מק״ט כפול</span>' : ""}</td>
+    <td>${esc(i.name)}</td><td>${esc(i.category)}</td><td>${esc(i.supplier)}</td><td>${esc(i.unit || "יח׳")}</td>
+    <td class="num">${i.u ? esc(i.u) + "U" : ""}</td><td class="num from">${usage(i.id) || ""}</td></tr>`).join("");
+  return `<div class="card">
+    <div class="card-h"><input class="search" id="search" type="search" placeholder="חיפוש לפי מק״ט, שם, קטגוריה או ספק" value="${esc(S.q)}"><button class="btn primary" data-act="new-item">+ פריט חדש</button></div>
+    ${S.items.length ? `<div class="tw"><table><thead><tr><th>מק״ט</th><th>תיאור</th><th>קטגוריה</th><th>ספק</th><th>יחידה</th><th>גובה</th><th>בארונות</th></tr></thead><tbody>${rows || `<tr><td colspan="7" class="empty">לא נמצאו פריטים</td></tr>`}</tbody></table></div>`
+      : '<div class="empty">הקטלוג ריק. הוסף את האביזרים שאתה מכניס לארונות: פאץ׳ פאנלים, מגשים, מאווררים, ברגים וכו׳.</div>'}
+  </div>`;
+}
+
+/* ---------- editors ---------- */
+let draft = null, armed = null;
+function closeDrawer() { $("#overlay").innerHTML = ""; draft = null; armed = null; }
+function drawer(title, body, foot) {
+  $("#overlay").innerHTML = `<div class="scrim" data-act="scrim"><div class="drawer" dir="rtl" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+    <div class="drawer-h"><h2 style="font-size:18px">${esc(title)}</h2><button class="btn ghost" data-act="close" aria-label="סגור">✕</button></div>
+    <div class="drawer-b">${body}</div><div class="drawer-f">${foot}</div></div></div>`;
+}
+function datalists() {
+  const cats = [...new Set(S.items.map(i => i.category).filter(Boolean))], sups = [...new Set(S.items.map(i => i.supplier).filter(Boolean))];
+  return `<datalist id="dl-cat">${cats.map(c => `<option value="${esc(c)}">`).join("")}</datalist><datalist id="dl-sup">${sups.map(c => `<option value="${esc(c)}">`).join("")}</datalist>`;
+}
+function openItem(id) {
+  const it = id ? { ...byId(S.items, id) } : { id: null, sku: "", name: "", category: "", supplier: "", unit: "יח׳", u: "", note: "" };
+  draft = { type: "item", data: it };
+  const used = id ? S.cabinets.filter(c => (c.lines || []).some(l => l.itemId === id)) : [];
+  drawer(id ? "עריכת פריט" : "פריט חדש", `
+    <div class="grid-form">
+      <label class="field"><span class="label">מק״ט *</span><input id="f-sku" class="mono" dir="ltr" value="${esc(it.sku)}" required></label>
+      <label class="field" style="grid-column:1/-1"><span class="label">תיאור *</span><input id="f-name" value="${esc(it.name)}"></label>
+      <label class="field"><span class="label">קטגוריה</span><input id="f-cat" list="dl-cat" value="${esc(it.category)}" placeholder="פאנלים, אוורור, חשמל…"></label>
+      <label class="field"><span class="label">ספק / יצרן</span><input id="f-sup" list="dl-sup" value="${esc(it.supplier)}"></label>
+      <label class="field"><span class="label">יחידת מידה</span><select id="f-unit">${UNITS.map(u => `<option ${u === it.unit ? "selected" : ""}>${u}</option>`).join("")}</select></label>
+      <label class="field"><span class="label">גובה ביחידות U (לא חובה)</span><input id="f-u" type="number" min="0" step="0.5" value="${esc(it.u)}"></label>
+      <label class="field" style="grid-column:1/-1"><span class="label">הערה</span><input id="f-note" value="${esc(it.note)}" placeholder="צבע, מידה, דגם חלופי…"></label>
+    </div>${datalists()}
+    ${used.length ? `<div class="hint">מופיע ב-${used.length} ארונות: ${used.map(c => esc(c.sku)).join(", ")}</div>` : ""}
+    <div id="f-err" class="chip warn" hidden></div>`,
+    `<div class="row"><button class="btn primary" data-act="save-item">שמור</button><button class="btn" data-act="close">ביטול</button></div>
+     ${id ? `<button class="btn danger" data-act="del-item" id="del-btn">מחק פריט</button>` : ""}`);
+  setTimeout(() => $("#f-sku") && $("#f-sku").focus(), 30);
+}
+function openCab(id, clone) {
+  const src = id ? byId(S.cabinets, id) : null;
+  const c = src ? JSON.parse(JSON.stringify(src)) : { id: null, sku: "", name: "", sizeU: 42, desc: "", lines: [] };
+  if (clone) { c.id = null; c.sku = c.sku + "-COPY"; c.name = c.name + " (עותק)"; }
+  if (!c.lines) c.lines = [];
+  draft = { type: "cab", data: c };
+  renderCab();
+}
+function renderCab() {
+  const c = draft.data; const isNew = !c.id;
+  const used = cabU(c), size = Number(c.sizeU) || 0;
+  const lines = c.lines.map((l, i) => `<div class="eline">
+      <select id="cl-i-${i}" data-cl="item" data-i="${i}" aria-label="פריט">${itemOptions(l.itemId)}</select>
+      <input id="cl-q-${i}" class="qty" style="width:100%" type="number" min="0" step="any" inputmode="decimal" data-cl="qty" data-i="${i}" value="${esc(l.qty)}" aria-label="כמות">
+      <button class="btn ghost" data-act="cl-rm" data-i="${i}" aria-label="הסר שורה">✕</button></div>`).join("");
+  drawer(isNew ? "ארון חדש" : "עריכת ארון", `
+    <div class="grid-form">
+      <label class="field"><span class="label">מק״ט ארון *</span><input id="c-sku" class="mono" dir="ltr" value="${esc(c.sku)}"></label>
+      <label class="field" style="grid-column:1/-1"><span class="label">שם הארון *</span><input id="c-name" value="${esc(c.name)}"></label>
+      <label class="field"><span class="label">גובה (U)</span><input id="c-size" type="number" min="0" value="${esc(c.sizeU)}"></label>
+      <label class="field" style="grid-column:1/-1"><span class="label">תיאור</span><input id="c-desc" value="${esc(c.desc)}" placeholder="מידות, צבע, סוג דלת…"></label>
+    </div>
+    <div style="display:grid;gap:8px">
+      <div class="row" style="justify-content:space-between"><span class="label">אביזרים בארון (כמות לארון אחד)</span>${size ? `<span class="chip num" id="u-chip">${used}/${size}U</span>` : ""}</div>
+      ${lines || '<div class="hint">הוסף את האביזרים שנכנסים לארון הזה.</div>'}
+      <div class="row"><button class="btn" data-act="cl-add" ${S.items.length ? "" : "disabled"}>+ הוסף אביזר</button>${S.items.length ? "" : '<span class="hint">קודם הוסף פריטים לקטלוג.</span>'}</div>
+    </div>
+    <div id="f-err" class="chip warn" hidden></div>`,
+    `<div class="row"><button class="btn primary" data-act="save-cab">שמור</button><button class="btn" data-act="close">ביטול</button>${isNew ? "" : `<button class="btn" data-act="clone-cab">שכפל</button>`}</div>
+     ${isNew ? "" : `<button class="btn danger" data-act="del-cab" id="del-btn">מחק ארון</button>`}`);
+}
+function readCabFields() {
+  const c = draft.data;
+  c.sku = $("#c-sku").value.trim(); c.name = $("#c-name").value.trim(); c.sizeU = Number($("#c-size").value) || 0; c.desc = $("#c-desc").value.trim();
+}
+function showErr(m) { const e = $("#f-err"); e.textContent = m; e.hidden = false; }
+
+/* ---------- events ---------- */
+document.addEventListener("click", async e => {
+  const t = e.target.closest("[data-act],[data-tab]");
+  if (!t) return;
+  if (t.dataset.tab) { S.tab = t.dataset.tab; render(); return; }
+  const a = t.dataset.act, i = Number(t.dataset.i);
+  if (a === "scrim" && e.target !== t) return;
+  const o = S.order;
+  switch (a) {
+    case "scrim": case "close": closeDrawer(); break;
+    case "add-line": o.lines.push({ cabinetId: "", qty: 1 }); saveOrderSoon(); render(); break;
+    case "rm-line": o.lines.splice(i, 1); saveOrderSoon(); render(); break;
+    case "add-extra": o.extras.push({ itemId: "", qty: 1 }); saveOrderSoon(); render(); break;
+    case "rm-extra": o.extras.splice(i, 1); saveOrderSoon(); render(); break;
+    case "new-order":
+      if (t.dataset.armed) { S.order = blankOrder(); saveOrderSoon(); render(); toast("נפתחה הזמנה חדשה"); }
+      else { t.dataset.armed = "1"; t.textContent = "לחץ שוב לאישור – ההזמנה תתאפס"; t.classList.add("arm"); setTimeout(() => { if (t.isConnected) { delete t.dataset.armed; t.textContent = "הזמנה חדשה"; t.classList.remove("arm"); } }, 3000); }
+      break;
+    case "copy": await copyText(bomText()); break;
+    case "now-all": o.sendNow = {}; saveOrderSoon(); render(); break;
+    case "now-zero": { const { rows } = computeBom(); o.sendNow = { ...(o.sendNow || {}) }; rows.forEach(r => { if (r.remaining) o.sendNow[r.itemId] = 0; }); saveOrderSoon(); render(); break; }
+    case "ship": {
+      const { rows } = computeBom(); const lines = {};
+      rows.forEach(r => { if (r.now > 0) lines[r.itemId] = r.now; });
+      if (!Object.keys(lines).length) return;
+      const sh = { id: rid(), date: ($("#sh-date") && $("#sh-date").value) || today(), note: ($("#sh-note") && $("#sh-note").value.trim()) || "", lines };
+      o.shipments = [...(o.shipments || []), sh];
+      const sn = { ...(o.sendNow || {}) }; Object.keys(lines).forEach(id => delete sn[id]); o.sendNow = sn;
+      S.shipNote = ""; S.shipDate = "";
+      saveOrderSoon(); render();
+      openNote(sh.id);
+      break;
+    }
+    case "ship-copy": await copyText(shipText(t.dataset.id)); break;
+    case "ship-note": openNote(t.dataset.id); break;
+    case "note-dl": await saveFile(noteFileName(t.dataset.id), noteDoc(t.dataset.id)); break;
+    case "note-print": {
+      const w = window.open("", "_blank");
+      if (!w) { await saveFile(noteFileName(t.dataset.id), noteDoc(t.dataset.id)); break; }
+      w.document.open(); w.document.write(noteDoc(t.dataset.id).replace("</body>", "<scr" + "ipt>setTimeout(()=>print(),600)<\/scr" + "ipt></body>")); w.document.close();
+      break;
+    }
+    case "ship-csv": { const idx = shipIndex(t.dataset.id); await saveFile(`משלוח-${idx + 1}-${(o.number || "order").replace(/[\\/:*?"<>|]/g, "-")}.csv`, shipCsv(t.dataset.id)); break; }
+    case "ship-del": {
+      if (!t.dataset.armed) { t.dataset.armed = "1"; t.textContent = "לבטל משלוח?"; t.classList.add("arm"); setTimeout(() => { if (t.isConnected) { delete t.dataset.armed; t.textContent = "✕"; t.classList.remove("arm"); } }, 3000); return; }
+      o.shipments = (o.shipments || []).filter(x => x.id !== t.dataset.id); saveOrderSoon(); render(); toast("המשלוח בוטל והכמויות חזרו ליתרה"); break;
+    }
+    case "csv": await saveFile(`BOM-${(o.number || o.title || "order").replace(/[\\/:*?"<>|]/g, "-")}-${o.date || today()}.csv`, bomCsv()); break;
+    case "new-item": openItem(null); break;
+    case "edit-item": openItem(t.dataset.id); break;
+    case "save-item": {
+      const it = draft.data;
+      it.sku = $("#f-sku").value.trim(); it.name = $("#f-name").value.trim(); it.category = $("#f-cat").value.trim();
+      it.supplier = $("#f-sup").value.trim(); it.unit = $("#f-unit").value; it.u = $("#f-u").value ? Number($("#f-u").value) : ""; it.note = $("#f-note").value.trim();
+      if (!it.sku || !it.name) return showErr("מק״ט ותיאור הם שדות חובה");
+      if (S.items.some(x => x.id !== it.id && (x.sku || "").trim().toLowerCase() === it.sku.toLowerCase())) return showErr(`המק״ט ${it.sku} כבר קיים בקטלוג`);
+      if (!it.id) it.id = rid();
+      try { await putItem(it); closeDrawer(); toast("הפריט נשמר"); } catch (err) { showErr("השמירה נכשלה: אין לך הרשאת עריכה"); }
+      break;
+    }
+    case "del-item": {
+      if (armed !== "item") { armed = "item"; t.textContent = "לחץ שוב למחיקה"; t.classList.add("arm"); return; }
+      try { await delItem(draft.data.id); closeDrawer(); toast("הפריט נמחק"); } catch (err) { showErr("המחיקה נכשלה"); }
+      break;
+    }
+    case "new-cab": openCab(null); break;
+    case "edit-cab": openCab(t.dataset.id); break;
+    case "clone-cab": readCabFields(); { const d = JSON.parse(JSON.stringify(draft.data)); d.id = null; d.sku += "-COPY"; d.name += " (עותק)"; draft = { type: "cab", data: d }; renderCab(); } break;
+    case "cl-add": readCabFields(); draft.data.lines.push({ itemId: "", qty: 1 }); renderCab(); setTimeout(() => { const s = $(`#cl-i-${draft.data.lines.length - 1}`); s && s.focus(); }, 20); break;
+    case "cl-rm": readCabFields(); draft.data.lines.splice(i, 1); renderCab(); break;
+    case "save-cab": {
+      readCabFields(); const c = draft.data;
+      c.lines = c.lines.filter(l => l.itemId && Number(l.qty) > 0).map(l => ({ itemId: l.itemId, qty: Number(l.qty) }));
+      if (!c.sku || !c.name) return showErr("מק״ט ושם הארון הם שדות חובה");
+      if (S.cabinets.some(x => x.id !== c.id && (x.sku || "").trim().toLowerCase() === c.sku.toLowerCase())) return showErr(`המק״ט ${c.sku} כבר קיים`);
+      // merge duplicate item lines
+      const m = new Map(); c.lines.forEach(l => m.set(l.itemId, (m.get(l.itemId) || 0) + l.qty)); c.lines = [...m].map(([itemId, qty]) => ({ itemId, qty }));
+      if (!c.id) c.id = rid();
+      try { await putCab(c); closeDrawer(); toast("הארון נשמר"); } catch (err) { showErr("השמירה נכשלה: אין לך הרשאת עריכה"); }
+      break;
+    }
+    case "del-cab": {
+      if (armed !== "cab") { armed = "cab"; t.textContent = "לחץ שוב למחיקה"; t.classList.add("arm"); return; }
+      try { await delCab(draft.data.id); closeDrawer(); toast("הארון נמחק"); } catch (err) { showErr("המחיקה נכשלה"); }
+      break;
+    }
+  }
+});
+
+document.addEventListener("input", e => {
+  const t = e.target;
+  if (t.id === "search") { S.q = t.value; render(); return; }
+  if (t.id === "sh-note") { S.shipNote = t.value; return; }
+  if (t.id === "set-company") { S.settings = { ...S.settings, company: t.value }; const p = $("#note-prev"); if (p && draft && draft.type === "note") p.innerHTML = noteMarkup(draft.id); clearTimeout(window.__st); window.__st = setTimeout(saveSettings, 700); return; }
+  if (t.id === "sh-date") { S.shipDate = t.value; return; }
+  if (t.dataset.cl) {
+    const l = draft.data.lines[Number(t.dataset.i)];
+    if (t.dataset.cl === "qty") l.qty = t.value;
+    const chip = $("#u-chip"); if (chip) { chip.textContent = `${cabU(draft.data)}/${Number($("#c-size").value) || 0}U`; }
+    return;
+  }
+  if (t.dataset.order !== undefined && t.dataset.kind) {
+    const o = S.order, i = Number(t.dataset.i), k = t.dataset.kind;
+    if (k === "f") o[t.dataset.f] = t.value;
+    else if (k === "lineq") o.lines[i].qty = Math.max(0, Number(t.value) || 0);
+    else if (k === "extraq") o.extras[i].qty = Math.max(0, Number(t.value) || 0);
+    else if (k === "now") { o.sendNow = { ...(o.sendNow || {}), [t.dataset.item]: t.value === "" ? 0 : Math.max(0, Number(t.value) || 0) }; }
+    else return;
+    saveOrderSoon();
+    if (k !== "f") render();
+  }
+});
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (t.id === "groupBy") { S.groupBy = t.value; render(); return; }
+  if (t.id === "supFilter") { S.supplierFilter = t.value; render(); return; }
+  if (t.dataset.cl === "item") { draft.data.lines[Number(t.dataset.i)].itemId = t.value; const chip = $("#u-chip"); if (chip) chip.textContent = `${cabU(draft.data)}/${Number($("#c-size").value) || 0}U`; return; }
+  if (t.dataset.order !== undefined) {
+    const o = S.order, i = Number(t.dataset.i);
+    if (t.dataset.kind === "line") o.lines[i].cabinetId = t.value;
+    else if (t.dataset.kind === "extra") o.extras[i].itemId = t.value;
+    else return;
+    saveOrderSoon(); render();
+  }
+});
+document.addEventListener("focusout", e => {
+  // pick up remote order changes deferred while typing
+  if (e.target.closest && e.target.closest("[data-order]")) setTimeout(() => { if (S.mode === "db" && !document.activeElement.closest("[data-order]")) render(); }, 50);
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && draft) closeDrawer(); });
+
+{ const st = document.createElement("style"); st.textContent = NOTE_CSS; document.head.appendChild(st); }
+boot();
+})();
+</script>
+
+</body>
+</html>
