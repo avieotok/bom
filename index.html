@@ -1608,7 +1608,7 @@ const subOf = (o, toId) => (o.subs || []).filter(sb => sb.to === toId);
 function nextRev(r) { r = String(r || "A").toUpperCase(); const n = [...r].reduce((a, ch) => a * 26 + (ch.charCodeAt(0) - 64), 0) + 1; let x = n, out = ""; while (x > 0) { const m = (x - 1) % 26; out = String.fromCharCode(65 + m) + out; x = Math.floor((x - 1) / 26); } return out; }
 const revOf = c => (c && c.rev) || "A";
 function cabSnapshot(c) { return { rev: revOf(c), sku: c.sku, name: c.name, baseItemId: c.baseItemId || null, includeBase: c.includeBase, lines: JSON.parse(JSON.stringify(c.lines || [])), at: c.revAt || "", by: c.revBy || "", note: c.revNote || "", eff: c.revEff || "", req: c.revReq || "", eco: c.revEco || "", repl: c.revRepl || [] }; }
-function cabSig(c) { return JSON.stringify({ sku: c.sku, b: c.baseItemId || null, ib: c.includeBase === true, l: [...(c.lines || [])].map(l => [l.itemId, Number(l.qty) || 0]).sort((a, b) => String(a[0]).localeCompare(String(b[0]))) }); }
+function cabSig(c) { return JSON.stringify({ sku: c.sku, b: c.baseItemId || null, l: [...(c.lines || [])].map(l => [l.itemId, Number(l.qty) || 0]).sort((a, b) => String(a[0]).localeCompare(String(b[0]))) }); }
 function cabDiff(prev, next) {
   const pm = new Map((prev || []).map(l => [l.itemId, Number(l.qty) || 0])), nm = new Map((next || []).map(l => [l.itemId, Number(l.qty) || 0]));
   const out = [];
@@ -1635,8 +1635,7 @@ function buildable(o) {
   cabRows(o).forEach(c => {
     const sc = scr[c.cabinetId] || 0, cap = c.qty + sc;
     /* הגדרת הארון כפי שנשמרה בהזמנה (גרסה), לא הגרסה הנוכחית בקטלוג */
-    const cab = cabFor(o, c.cabinetId); const agg = new Map(); (cab ? cab.lines || [] : []).forEach(l => { if (l.itemId && Number(l.qty) > 0) agg.set(l.itemId, (agg.get(l.itemId) || 0) + Number(l.qty)); });
-    if (cab && cab.baseItemId && cab.includeBase === true) agg.set(cab.baseItemId, (agg.get(cab.baseItemId) || 0) + 1);
+    const cab = cabFor(o, c.cabinetId); const agg = new Map(); (cab ? cab.lines || [] : []).forEach(l => { if (l.itemId && Number(l.qty) > 0 && l.itemId !== cab.baseItemId) agg.set(l.itemId, (agg.get(l.itemId) || 0) + Number(l.qty)); });
     const comps = [...agg].map(([itemId, qty]) => ({ itemId, qty }));
     let k = cap; const parts = [];
     comps.forEach(l => { const per = Number(l.qty), have = avail[l.itemId] || 0, fit = Math.floor(have / per); parts.push({ itemId: l.itemId, per, have, fit }); k = Math.min(k, fit); });
@@ -2037,10 +2036,10 @@ function computeBom(oArg) {
   for (const l of o.lines || []) {
     const c = cabFor(o, l.cabinetId); const n = Number(l.qty) || 0;
     if (!c || !n) continue; cabCount += n;
-    if (c.baseItemId && c.includeBase === true) add(c.baseItemId, n, `ארון מחווט ${c.sku} ×${n}`);
-    for (const cl of c.lines || []) add(cl.itemId, (Number(cl.qty) || 0) * n, `${c.sku || c.name} ×${n}`);
+    /* המוצר המוגמר עצמו לעולם לא נכנס לרשימת החומרים שלו */
+    for (const cl of c.lines || []) if (!c.baseItemId || cl.itemId !== c.baseItemId) add(cl.itemId, (Number(cl.qty) || 0) * n, `${c.sku || c.name} ×${n}`);
   }
-  { const sc = scrapTotals(o); for (const [cid, n] of Object.entries(sc)) { const c = cabFor(o, cid); if (!c || !n) continue; if (c.baseItemId && c.includeBase === true) add(c.baseItemId, n, `ארון חלופי ל-${n} שנגרטו`); for (const cl of c.lines || []) add(cl.itemId, (Number(cl.qty) || 0) * n, `${c.sku || c.name} ×${n} חלופי (נגרט)`); } }
+  { const sc = scrapTotals(o); for (const [cid, n] of Object.entries(sc)) { const c = cabFor(o, cid); if (!c || !n) continue; for (const cl of c.lines || []) if (!c.baseItemId || cl.itemId !== c.baseItemId) add(cl.itemId, (Number(cl.qty) || 0) * n, `${c.sku || c.name} ×${n} חלופי (נגרט)`); } }
   for (const e of o.extras || []) add(e.itemId, Number(e.qty) || 0, "פריט בודד");
   for (const sb of o.subs || []) {
     const fr = map.get(sb.from); if (!fr) continue;
@@ -5339,7 +5338,6 @@ function renderCab() {
         <div class="results" id="csku-results"></div></div>
         ${c.baseItemId && byId(S.items, c.baseItemId) ? `<div class="row" style="gap:8px;font-size:13px">
           <span class="chip" style="color:var(--earth)">🔗 מקושר לקטלוג: <span class="sku">${esc(byId(S.items, c.baseItemId).sku)}</span> · ${esc(byId(S.items, c.baseItemId).name)}</span>
-          <label class="row" style="gap:5px"><input type="checkbox" id="c-incbase" style="width:auto" ${c.includeBase !== false ? "checked" : ""}> הוסף את מק״ט הארון גם לרשימת החומרים</label>
           <button type="button" class="btn ghost" data-act="csku-unlink">נתק</button></div>` : ""}
       </div>
       <label class="field" style="grid-column:1/-1"><span class="label" style="display:flex;justify-content:space-between;gap:8px">שם הארון * <span class="from" style="font-weight:400">מתמלא אוטומטית מתיאור המק״ט בקטלוג</span></span><input id="c-name" value="${esc(c.name)}"></label>
@@ -5463,7 +5461,7 @@ function readCabFields() {
   const c = draft.data;
   const rn = $("#c-revnote"); if (rn) draft.revNote = rn.value;
   c.sku = $("#c-sku").value.trim(); c.name = $("#c-name").value.trim(); c.desc = $("#c-desc").value.trim();
-  const ib = $("#c-incbase"); if (ib) c.includeBase = ib.checked;
+  c.includeBase = false;
   const base = c.baseItemId && byId(S.items, c.baseItemId);
   if (c.baseItemId && (!base || String(base.sku).trim() !== c.sku)) { c.baseItemId = null; }
 }
