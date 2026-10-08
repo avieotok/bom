@@ -1177,7 +1177,7 @@ function currentUser() {
 }
 function authOn() { return true; }
 function role() { if (!authOn()) return "open"; const u = currentUser(); return u ? u.role : "none"; }
-const VIEW_ACTS = new Set(["go-ref", "ss-sku", "ssp-close", "ssp-go", "sn-f", "sn-xl", "sn-lbl", "lbl-sh", "lbl-note", "lp-print", "lp-test", "lp-all", "rc-labels", "lbl-one", "lbl-rc", "sn-pick", "perf-print", "ss-open", "ss-print", "ss-xl", "as-open", "as-xl", "as-tog", "dash-range", "dash-table", "dash-delays", "about", "logout", "close", "scrim", "h-range", "h-xl-build", "h-xl-short", "h-xl-rc", "rc-xl", "h-sub", "h-toggle", "h-filter", "h-filter-clear", "h-open-all", "h-close-all", "h-qclear", "h-note", "rc-view", "rc-dl", "rc-print", "note-dl", "note-print", "ship-note", "ship-copy", "ship-csv", "copy", "csv", "short-copy", "short-csv", "rc-sub", "rc-sel", "rc-unsel", "login"]);
+const VIEW_ACTS = new Set(["go-ref", "pick-print", "ss-sku", "ssp-close", "ssp-go", "sn-f", "sn-xl", "sn-lbl", "lbl-sh", "lbl-note", "lp-print", "lp-test", "lp-all", "rc-labels", "lbl-one", "lbl-rc", "sn-pick", "perf-print", "ss-open", "ss-print", "ss-xl", "as-open", "as-xl", "as-tog", "dash-range", "dash-table", "dash-delays", "about", "logout", "close", "scrim", "h-range", "h-xl-build", "h-xl-short", "h-xl-rc", "rc-xl", "h-sub", "h-toggle", "h-filter", "h-filter-clear", "h-open-all", "h-close-all", "h-qclear", "h-note", "rc-view", "rc-dl", "rc-print", "note-dl", "note-print", "ship-note", "ship-copy", "ship-csv", "copy", "csv", "short-copy", "short-csv", "rc-sub", "rc-sel", "rc-unsel", "login"]);
 const VIEW_INPUTS = new Set(["sn-q", "lp-start", "lp-copies", "ss-asm", "ss-cab", "as-asm", "h-q", "h-from", "h-to", "sl-search", "groupBy", "supFilter", "login-name", "login-pass", "rc-q-search"]);
 const DEV_ONLY_ACTS = new Set(["pt-add", "pt-del", "pt-ren"]);
 function applyRole(root) {
@@ -1294,6 +1294,7 @@ function actInfo(a, t) {
     case "h-xl-short": return ["ייצוא אקסל – חוסרים", ""];
     case "h-xl-rc": case "rc-xl": return ["ייצוא אקסל – קבלות", ""];
     case "csv": return ["ייצוא בום לאקסל", refNo(S.order)];
+    case "pick-print": return ["הדפסת רשימת ליקוט", refNo(S.order)];
     case "h-open": return ["פתיחת הזמנה מההיסטוריה", refOf(d.id)];
     case "clear-all": return armedTwice ? ["ניקוי מסך הבום", refNo(S.order)] : null;
     case "pm-copy": return ["הודעת חוסרים לרכש (הועתקה)", `${refNo(S.order)}`];
@@ -2109,6 +2110,64 @@ function bomCsv() {
   return "﻿" + lines.map(l => l.join(",")).join("\r\n");
 }
 
+/* ---------- רשימת ליקוט: הדפסת הבום להכנה במחסן לפני הפקת תעודת משלוח ---------- */
+function pickDoc() {
+  const o = S.order, { rows, key } = computeBom();
+  const open = rows.filter(r => r.remaining > 0);
+  const ships = (o.shipments || []).length;
+  const cabs = cabRows(o);
+  const units = open.reduce((x, r) => x + r.remaining, 0);
+  let n = 0, last = null;
+  const body = open.map(r => {
+    const g = key(r), head = g !== last ? `<tr class="pk-g"><td colspan="8">${esc(g)}</td></tr>` : ""; last = g; n++;
+    return `${head}<tr><td class="c pk-n">${n}</td><td class="pk-box"><span></span></td><td class="pk-sku">${esc(r.item.sku)}</td><td>${esc(r.item.name)}${r.overridden ? ' <span class="pk-tag">כמות ידנית</span>' : ""}</td><td class="c">${esc(r.item.unit || "יח׳")}</td><td class="c pk-q">${r.remaining}</td><td class="pk-w"></td><td class="pk-w2"></td></tr>`;
+  }).join("");
+  const info = [
+    ["הזמנה", refNo(o) ? `${refLabel(o)} ${refNo(o)}` : "—"],
+    ["פרויקט", projLabel(o) || "—"],
+    ["ספק הרכבה", toName(o) || "—"],
+    ["תאריך הזמנה", o.date ? fmtDate(o.date) : "—"],
+    ["הודפס", `${fmtDate(today())} ${new Date().toTimeString().slice(0, 5)}${meName() ? " · " + meName() : ""}`],
+  ];
+  if (S.supplierFilter) info.push(["ספק פריטים", S.supplierFilter]);
+  if (ships) info.push(["שים לב", `כבר נרשמו ${ships} משלוחים – מוצגת רק היתרה שטרם נשלחה`]);
+  return `<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>רשימת ליקוט ${esc(refNo(o) || o.title || "")}</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Hebrew:wght@400;600;700&display=swap">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#e7e8e4;font-family:"IBM Plex Sans Hebrew",Arial,sans-serif;color:#1b1f23}
+.pbar{text-align:center;padding:14px}.pbar button{font:inherit;font-weight:700;padding:9px 18px;border-radius:6px;border:0;background:#1d5fa0;color:#fff;cursor:pointer}
+.pk{max-width:820px;margin:0 auto 24px;background:#fff;padding:22px 26px;box-shadow:0 1px 6px rgba(0,0,0,.15)}
+.pk-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;border-bottom:2px solid #1b1f23;padding-bottom:10px}
+.pk-head h1{margin:0;font-size:22px}.pk-head .sub{font-size:12px;color:#555;margin-top:2px}
+.pk-brand{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600}.pk-brand img{height:38px}
+.pk-info{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 16px;margin:10px 0;font-size:12.5px}.pk-info b{color:#555;font-weight:600;margin-inline-end:4px}
+.pk-cabs{font-size:12.5px;margin:6px 0 10px;padding:6px 10px;background:#f3f4f1;border-radius:4px}.pk-cabs span{display:inline-block;margin-inline-end:14px}
+.pk-sum{font-size:12.5px;margin-bottom:6px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}thead{display:table-header-group}tr{page-break-inside:avoid}
+th{background:#1b1f23;color:#fff;font-weight:600;padding:5px 6px;text-align:right}td{border-bottom:1px solid #c9ccc6;padding:6px;vertical-align:middle}
+.c{text-align:center}.pk-n{color:#777;width:26px}.pk-sku{font-family:"IBM Plex Mono",monospace;direction:ltr;text-align:right;white-space:nowrap}
+.pk-q{font-weight:700;font-size:14px;width:58px}.pk-w{width:70px;border-bottom:1px solid #888}.pk-w2{width:110px}
+.pk-box{width:26px}.pk-box span{display:block;width:15px;height:15px;border:1.5px solid #1b1f23;border-radius:2px;margin:auto}
+.pk-g td{background:#eef0ec;font-weight:700;font-size:12px;padding:4px 6px}
+.pk-tag{font-size:10px;border:1px solid #c58a2b;color:#8a5a12;border-radius:3px;padding:0 3px}
+.pk-sign{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:26px;font-size:12.5px}.pk-sign div{border-top:1px solid #1b1f23;padding-top:4px}
+.pk-foot{margin-top:12px;font-size:11px;color:#777}
+@page{size:A4 portrait;margin:11mm 12mm}
+@media print{body{background:#fff}.pbar{display:none}.pk{box-shadow:none;margin:0;max-width:none;padding:0}th{-webkit-print-color-adjust:exact;print-color-adjust:exact}.pk-g td,.pk-cabs{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body><div class="pbar"><button onclick="print()">הדפס / שמור כ-PDF</button></div>
+<div class="pk">
+<div class="pk-head"><div><h1>רשימת ליקוט – הכנת בום</h1><div class="sub">לבדיקת זמינות במחסן לפני הפקת תעודת משלוח · אינה תעודת משלוח</div></div><div class="pk-brand"><img src="${LOGO}" alt=""><div>${CO}</div></div></div>
+<div class="pk-info">${info.map(([k, v]) => `<div><b>${esc(k)}:</b>${esc(v)}</div>`).join("")}</div>
+${cabs.length ? `<div class="pk-cabs"><b>ארונות בהזמנה: </b>${cabs.map(c => `<span>${esc(c.name)} <span class="pk-sku">${esc(c.sku)}</span> × <b>${c.qty}</b></span>`).join("")}</div>` : ""}
+<div class="pk-sum"><b>${open.length}</b> שורות · <b>${units}</b> יחידות להכנה</div>
+<table><thead><tr><th class="c">#</th><th class="c">✓</th><th>מק״ט</th><th>תיאור</th><th class="c">יח׳</th><th class="c">להכנה</th><th class="c">נמצא</th><th>הערה</th></tr></thead><tbody>
+${body || '<tr><td colspan="8" class="c">אין פריטים להכנה</td></tr>'}
+</tbody></table>
+<div class="pk-sign"><div>הוכן ע״י</div><div>תאריך</div><div>נבדק ע״י</div></div>
+<div class="pk-foot">סמנו ✓ לכל פריט שנמצא, ורשמו בעמודת "נמצא" את הכמות בפועל אם חסר. את הכמויות החסרות מורידים בעמודה "לשליחה עכשיו" לפני הפקת התעודה.</div>
+</div></body></html>`;
+}
+
 function NO() { return S.noteOrder || S.order; }
 function shipIndex(id) { return (NO().shipments || []).findIndex(x => x.id === id); }
 function shipRemainingAfter(idx) {
@@ -2741,7 +2800,7 @@ function viewOrder() {
             <div class="shp-stats"><span><b>${nowUnits}</b> יחידות</span><span><b>${nowLines}</b> שורות</span>${shortLines ? `<span class="warn"><b>${shortLines}</b> יושלמו בהמשך</span>` : ""}</div>
           </div>
           <div class="hint">ברשימה למטה (עמודת ״לשליחה עכשיו״) מורידים כמות בשורות שאין מספיק במלאי – מה שלא יוצא עכשיו יישאר ביתרה.${S.supplierFilter ? " נשלחות רק השורות של הספק המסונן." : ""}</div>
-          <div class="shp-quick"><button class="btn" data-act="now-all">↺ הכל לפי היתרה</button><button class="btn" data-act="now-zero">0 אפס הכל</button>${shortLines > 1 ? `<button class="btn mailall" data-act="po-mail" data-item="">✉ שלח הכל לרכש (${shortLines})</button>` : ""}</div>
+          <div class="shp-quick"><button class="btn" data-act="pick-print" title="הדפסת רשימת הפריטים להכנה במחסן">🖨 הדפס רשימת ליקוט</button><button class="btn" data-act="now-all">↺ הכל לפי היתרה</button><button class="btn" data-act="now-zero">0 אפס הכל</button>${shortLines > 1 ? `<button class="btn mailall" data-act="po-mail" data-item="">✉ שלח הכל לרכש (${shortLines})</button>` : ""}</div>
           <div class="shp-fields">
             ${ships.length ? `<div class="field shp-wr"><span class="label">מס׳ תעודת ההשלמה (מפריוריטי) *</span>${grBoxes("sh", S.shipDoc, "WR")}</div>` : ""}
             <label class="field"><span class="label">תאריך משלוח</span><input id="sh-date" type="date" value="${esc(S.shipDate || today())}"></label>
@@ -2761,6 +2820,7 @@ function viewOrder() {
         <span class="hint" style="text-align:center">${rows.length ? "בטבלה למטה קובעים מה יוצא עכשיו, ומפיקים את התעודה" : "בחר ארונות כדי לחשב את הבום"}</span>`
         : rows.length ? '<strong style="color:var(--earth);text-align:center">✔ כל הפריטים נשלחו – ההזמנה הושלמה</strong>' : '<span class="hint" style="text-align:center">בחר ארונות כדי לחשב את הבום</span>'}
       </div>
+      ${openRows.length ? `<div style="padding:0 16px 12px;display:flex;justify-content:center"><button type="button" class="btn" data-act="pick-print" title="הדפסת רשימת הפריטים להכנה במחסן – לפני הפקת תעודת המשלוח">🖨 הדפס רשימת ליקוט</button></div>` : ""}
       <div class="os-ships"><b>משלוחים${ships.length ? ` (${ships.length})` : ""}</b>
         ${ships.length ? shipList : '<div class="hint">עדיין אין משלוחים. אחרי ההפקה יופיעו כאן המשלוחים ומה נשאר פתוח.</div>'}
       </div>
@@ -2793,6 +2853,7 @@ function viewOrder() {
     <div class="card-b row" style="border-top:1px solid var(--line);justify-content:space-between">
       <span class="hint">הבום המלא של ההזמנה, בלי קשר למשלוחים.</span>
       <div class="row">
+        <button class="btn" data-act="pick-print" ${openRows.length ? "" : "disabled"} title="הדפסת רשימת הפריטים להכנה במחסן – לפני הפקת תעודת המשלוח">🖨 הדפס רשימת ליקוט</button>
         <button class="btn" data-act="copy" ${rows.length ? "" : "disabled"}>העתק בום מלא</button>
         <button class="btn" data-act="csv" ${rows.length ? "" : "disabled"}>⬇ ייצא בום לאקסל</button>
       </div>
@@ -5694,6 +5755,7 @@ document.addEventListener("click", async e => {
       else { t.dataset.armed = "1"; t.textContent = hasContent(o) ? "לחץ שוב – ההזמנה תישמר בהיסטוריה" : "לחץ שוב לאישור"; t.classList.add("arm"); setTimeout(() => { if (t.isConnected) { delete t.dataset.armed; t.textContent = "הזמנה חדשה"; t.classList.remove("arm"); } }, 3000); }
       break;
     case "copy": await copyText(bomText()); break;
+    case "pick-print": { const o = S.order, doc = pickDoc(), w = window.open("", "_blank"); if (!w) { await saveFile(`רשימת-ליקוט-${safeName(refNo(o) || o.projCode || o.title || "order")}-${today()}.html`, doc); break; } w.document.open(); w.document.write(doc.replace("</body>", "<scr" + "ipt>setTimeout(()=>print(),700)<\/scr" + "ipt></body>")); w.document.close(); break; }
     case "h-range": {
       const d = new Date(), r = t.dataset.r;
       S.hTo = today();
