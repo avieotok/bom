@@ -2133,7 +2133,7 @@ function pickDoc() {
   let n = 0, last = null;
   const body = open.map(r => {
     const g = key(r), head = g !== last ? `<tr class="pk-g"><td colspan="8">${esc(g)}</td></tr>` : ""; last = g; n++;
-    return `${head}<tr><td class="c pk-n">${n}</td><td class="pk-box"><span></span></td><td class="pk-sku">${esc(r.item.sku)}</td><td>${esc(r.item.name)}${r.overridden ? ' <span class="pk-tag">כמות ידנית</span>' : ""}</td><td class="c">${esc(r.item.unit || "יח׳")}</td><td class="c pk-q">${r.remaining}</td><td class="pk-w"></td><td class="pk-w2"></td></tr>`;
+    return `${head}<tr><td class="c pk-n">${n}</td><td class="pk-box"><span></span></td><td class="pk-sku">${esc(r.item.sku)}</td><td>${esc(r.item.name)}${r.overridden ? ' <span class="pk-tag">כמות ידנית</span>' : ""}</td><td class="c">${esc(r.item.unit || "יח׳")}</td><td class="c pk-q">${r.remaining}</td><td class="c pk-w">${S.stock ? (() => { const lv = stockLive(r.itemId); return `<span class="pk-st ${lv < r.remaining ? "pk-low" : ""}">${fmtN(lv)}</span>`; })() : ""}</td><td class="pk-w2"></td></tr>`;
   }).join("");
   const info = [
     ["הזמנה", refNo(o) ? `${refLabel(o)} ${refNo(o)}` : "—"],
@@ -2143,6 +2143,7 @@ function pickDoc() {
     ["הודפס", `${fmtDate(today())} ${new Date().toTimeString().slice(0, 5)}${meName() ? " · " + meName() : ""}`],
   ];
   if (S.supplierFilter) info.push(["ספק פריטים", S.supplierFilter]);
+  if (S.stock) info.push(["מלאי פריוריטי", `נכון ל-${fmtDT(Date.parse(S.stock.asOf))} (פחות משלוחים שהופקו מאז)`]);
   if (ships) info.push(["שים לב", `כבר נרשמו ${ships} משלוחים – מוצגת רק היתרה שטרם נשלחה`]);
   return `<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>רשימת ליקוט ${esc(refNo(o) || o.title || "")}</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Hebrew:wght@400;600;700&display=swap">
@@ -2159,7 +2160,7 @@ function pickDoc() {
 table{width:100%;border-collapse:collapse;font-size:12.5px}thead{display:table-header-group}tr{page-break-inside:avoid}
 th{background:#1b1f23;color:#fff;font-weight:600;padding:5px 6px;text-align:right}td{border-bottom:1px solid #c9ccc6;padding:6px;vertical-align:middle}
 .c{text-align:center}.pk-n{color:#777;width:26px}.pk-sku{font-family:"IBM Plex Mono",monospace;direction:ltr;text-align:right;white-space:nowrap}
-.pk-q{font-weight:700;font-size:14px;width:58px}.pk-w{width:70px;border-bottom:1px solid #888}.pk-w2{width:110px}
+.pk-q{font-weight:700;font-size:14px;width:58px}.pk-st{font-weight:700;font-size:14px}.pk-low{color:#b3261e;border:1.5px solid #b3261e;border-radius:4px;padding:0 5px}.pk-w{width:70px;border-bottom:1px solid #888}.pk-w2{width:110px}
 .pk-box{width:26px}.pk-box span{display:block;width:15px;height:15px;border:1.5px solid #1b1f23;border-radius:2px;margin:auto}
 .pk-g td{background:#eef0ec;font-weight:700;font-size:12px;padding:4px 6px}
 .pk-tag{font-size:10px;border:1px solid #c58a2b;color:#8a5a12;border-radius:3px;padding:0 3px}
@@ -2173,11 +2174,11 @@ th{background:#1b1f23;color:#fff;font-weight:600;padding:5px 6px;text-align:righ
 <div class="pk-info">${info.map(([k, v]) => `<div><b>${esc(k)}:</b>${esc(v)}</div>`).join("")}</div>
 ${cabs.length ? `<div class="pk-cabs"><b>ארונות בהזמנה: </b>${cabs.map(c => `<span>${esc(c.name)} <span class="pk-sku">${esc(c.sku)}</span> × <b>${c.qty}</b></span>`).join("")}</div>` : ""}
 <div class="pk-sum"><b>${open.length}</b> שורות · <b>${units}</b> יחידות להכנה</div>
-<table><thead><tr><th class="c">#</th><th class="c">✓</th><th>מק״ט</th><th>תיאור</th><th class="c">יח׳</th><th class="c">להכנה</th><th class="c">נמצא</th><th>הערה</th></tr></thead><tbody>
+<table><thead><tr><th class="c">#</th><th class="c">✓</th><th>מק״ט</th><th>תיאור</th><th class="c">יח׳</th><th class="c">להכנה</th><th class="c">נמצא${S.stock ? '<div style="font-size:10px;font-weight:400">מלאי פריוריטי</div>' : ""}</th><th>הערה</th></tr></thead><tbody>
 ${body || '<tr><td colspan="8" class="c">אין פריטים להכנה</td></tr>'}
 </tbody></table>
 <div class="pk-sign"><div>הוכן ע״י</div><div>תאריך</div><div>נבדק ע״י</div></div>
-<div class="pk-foot">סמנו ✓ לכל פריט שנמצא, ורשמו בעמודת "נמצא" את הכמות בפועל אם חסר. את הכמויות החסרות מורידים בעמודה "לשליחה עכשיו" לפני הפקת התעודה.</div>
+<div class="pk-foot">${S.stock ? 'בעמודת "נמצא" מוצג המלאי לפי פריוריטי – מספר במסגרת אדומה = במלאי פחות מהכמות להכנה. ' : ""}סמנו ✓ לכל פריט שנמצא, ורשמו את הכמות בפועל אם חסר. את הכמויות החסרות מורידים בעמודה "לשליחה עכשיו" לפני הפקת התעודה.</div>
 </div></body></html>`;
 }
 
