@@ -587,7 +587,7 @@ button.kpi{font:inherit;cursor:pointer;appearance:none}
 .top .spaces button[aria-pressed="true"],.spaces button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);box-shadow:0 1px 4px rgba(29,95,160,.3)}
 body.locked .top{display:none!important}
 nav.tabs button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-nav.tabs button[data-tab="hist"][aria-selected="true"],nav.tabs button[data-tab="dash"][aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+nav.tabs button[data-tab="hist"][aria-selected="true"],nav.tabs button[data-tab="dash"][aria-selected="true"],nav.tabs button[data-tab="stock"][aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
 .hmenu{position:relative}
 .hmenu>summary{list-style:none;cursor:pointer;font-size:16px;padding:6px 12px}
 .hmenu>summary::-webkit-details-marker{display:none}
@@ -781,9 +781,9 @@ nav.tabs button[aria-selected="true"]::before{background:rgba(255,255,255,.2);bo
 nav.tabs button[data-tab="order"]::after,nav.tabs button[data-tab="comp"]::after{content:"‹";position:absolute;inset-inline-end:-15px;color:var(--muted);font-weight:700;font-size:18px;pointer-events:none}
 nav.tabs button[data-tab="order"],nav.tabs button[data-tab="comp"]{position:relative;margin-inline-end:18px}
 nav.tabs button[data-tab="hist"]{margin-inline-start:auto}
-nav.tabs button[data-tab="hist"],nav.tabs button[data-tab="dash"]{background:transparent;border-color:transparent;color:var(--muted)}
-nav.tabs button[data-tab="hist"]:hover,nav.tabs button[data-tab="dash"]:hover{color:var(--ink);border-color:var(--line)}
-nav.tabs button[data-tab="hist"][aria-selected="true"],nav.tabs button[data-tab="dash"][aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+nav.tabs button[data-tab="hist"],nav.tabs button[data-tab="dash"],nav.tabs button[data-tab="stock"]{background:transparent;border-color:transparent;color:var(--muted)}
+nav.tabs button[data-tab="hist"]:hover,nav.tabs button[data-tab="dash"]:hover,nav.tabs button[data-tab="stock"]:hover{color:var(--ink);border-color:var(--line)}
+nav.tabs button[data-tab="hist"][aria-selected="true"],nav.tabs button[data-tab="dash"][aria-selected="true"],nav.tabs button[data-tab="stock"][aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
 .spaces{display:inline-flex;gap:4px;padding:4px;border-radius:12px;background:var(--ground);border:1px solid var(--line)}
 .spaces button{border:0;border-radius:9px;background:transparent;color:var(--muted);padding:8px 18px;font-size:14.5px;box-shadow:none}
 .spaces button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border:0;box-shadow:0 1px 4px rgba(29,95,160,.3)}
@@ -1061,6 +1061,7 @@ nav.tabs button[data-tab="hist"][aria-selected="true"],nav.tabs button[data-tab=
     <button role="tab" data-tab="rep" aria-selected="false">🔧 תיקונים והחזרות <span class="count" id="c-rep"></span></button>
     <button role="tab" data-tab="hist" aria-selected="false">היסטוריה ודוחות</button>
     <button role="tab" data-tab="dash" aria-selected="false">📊 דשבורד</button>
+    <button role="tab" data-tab="stock" aria-selected="false">📦 מלאי</button>
   </nav>
 
   <section class="view" id="view"></section>
@@ -1177,7 +1178,7 @@ function currentUser() {
 }
 function authOn() { return true; }
 function role() { if (!authOn()) return "open"; const u = currentUser(); return u ? u.role : "none"; }
-const VIEW_ACTS = new Set(["go-ref", "pick-print", "ss-sku", "ssp-close", "ssp-go", "sn-f", "sn-xl", "sn-lbl", "lbl-sh", "lbl-note", "lp-print", "lp-test", "lp-all", "rc-labels", "lbl-one", "lbl-rc", "sn-pick", "perf-print", "ss-open", "ss-print", "ss-xl", "as-open", "as-xl", "as-tog", "dash-range", "dash-table", "dash-delays", "about", "logout", "close", "scrim", "h-range", "h-xl-build", "h-xl-short", "h-xl-rc", "rc-xl", "h-sub", "h-toggle", "h-filter", "h-filter-clear", "h-open-all", "h-close-all", "h-qclear", "h-note", "rc-view", "rc-dl", "rc-print", "note-dl", "note-print", "ship-note", "ship-copy", "ship-csv", "copy", "csv", "short-copy", "short-csv", "rc-sub", "rc-sel", "rc-unsel", "login"]);
+const VIEW_ACTS = new Set(["stock-f", "stock-xl", "go-ref", "pick-print", "ss-sku", "ssp-close", "ssp-go", "sn-f", "sn-xl", "sn-lbl", "lbl-sh", "lbl-note", "lp-print", "lp-test", "lp-all", "rc-labels", "lbl-one", "lbl-rc", "sn-pick", "perf-print", "ss-open", "ss-print", "ss-xl", "as-open", "as-xl", "as-tog", "dash-range", "dash-table", "dash-delays", "about", "logout", "close", "scrim", "h-range", "h-xl-build", "h-xl-short", "h-xl-rc", "rc-xl", "h-sub", "h-toggle", "h-filter", "h-filter-clear", "h-open-all", "h-close-all", "h-qclear", "h-note", "rc-view", "rc-dl", "rc-print", "note-dl", "note-print", "ship-note", "ship-copy", "ship-csv", "copy", "csv", "short-copy", "short-csv", "rc-sub", "rc-sel", "rc-unsel", "login"]);
 const VIEW_INPUTS = new Set(["sn-q", "lp-start", "lp-copies", "ss-asm", "ss-cab", "as-asm", "h-q", "h-from", "h-to", "sl-search", "groupBy", "supFilter", "login-name", "login-pass", "rc-q-search"]);
 const DEV_ONLY_ACTS = new Set(["pt-add", "pt-del", "pt-ren"]);
 function applyRole(root) {
@@ -1316,7 +1317,7 @@ function actInfo(a, t) {
 }
 let lastTabLog = {};
 function logTab(tab) {
-  const names = { dash: "דשבורד", order: "בום להזמנה", comp: "השלמת חוסרים לבום", rcv: "קבלת ארונות", hist: "היסטוריה ודוחות", cabs: "ארונות", items: "קטלוג פריטים", asm: "ספקי הרכבה" };
+  const names = { dash: "דשבורד", stock: "מלאי", order: "בום להזמנה", comp: "השלמת חוסרים לבום", rcv: "קבלת ארונות", hist: "היסטוריה ודוחות", cabs: "ארונות", items: "קטלוג פריטים", asm: "ספקי הרכבה" };
   const now = Date.now(); if (!names[tab] || now - (lastTabLog[tab] || 0) < 5 * 60000) return; lastTabLog[tab] = now;
   logAct("צפייה במסך", names[tab]);
 }
@@ -1571,7 +1572,7 @@ function setStatus() {
 /* ---------- storage ---------- */
 function saveLocal() {
   if (S.mode !== "local") return;
-  try { localStorage.setItem(LS, JSON.stringify({ items: S.items, cabinets: S.cabinets, assemblers: S.assemblers, order: S.space === "cab" ? S.order : (S.orderBySpace.cab || null), orders: { ...S.orderBySpace, [S.space]: S.order }, settings: S.settings, log: S.logAll, svc: S.svc || [] })); } catch (e) {}
+  try { localStorage.setItem(LS, JSON.stringify({ items: S.items, cabinets: S.cabinets, assemblers: S.assemblers, order: S.space === "cab" ? S.order : (S.orderBySpace.cab || null), orders: { ...S.orderBySpace, [S.space]: S.order }, settings: S.settings, log: S.logAll, svc: S.svc || [], stock: S.stock || null })); } catch (e) {}
 }
 async function putItem(it) {
   if (S.mode === "db") { const { id, ...body } = it; await db.collection("items").doc(id).set(body); }
@@ -1728,6 +1729,7 @@ function startDb() {
   db.collection("assemblers").onSnapshot(s => { S.assemblers = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => collator.compare(a.name || "", b.name || "")); render(); }, onErr("ספקי ההרכבה"));
   db.collection("orderlog").onSnapshot(s => { setLogAll(s.docs.map(d => ({ id: d.id, ...d.data() }))); render(); }, onErr("ההיסטוריה"));
   db.collection("svc").onSnapshot(s => { S.svc = s.docs.map(d => ({ id: d.id, ...d.data() })); render(); }, () => {});
+  db.doc("stock/main").onSnapshot(s => { S.stock = s.exists && s.data() && s.data().asOf ? s.data() : null; _stMemo = null; render(); }, () => {});
   db.doc("settings/main").onSnapshot(s => { if (s.exists) S.settings = { company: "", ...s.data() }; }, () => {});
   _spSubs.clear(); subOrder(S.space); setTimeout(() => ptypes().forEach(t => subOrder(t.id)), 1500);
 }
@@ -1743,7 +1745,7 @@ async function boot() {
     S.mode = "local";
     let saved = null;
     try { saved = JSON.parse(localStorage.getItem(LS) || "null"); } catch (e) {}
-    if (saved) { S.settings = { company: "", ...(saved.settings || {}) }; S.items = saved.items || []; S.svc = saved.svc || []; S.cabinets = saved.cabinets || []; S.assemblers = saved.assemblers || []; S.orderBySpace = { ...(saved.orders || {}) }; if (!S.orderBySpace.cab && saved.order) S.orderBySpace.cab = saved.order; S.order = { ...blankOrder(), ...(S.orderBySpace[S.space] || {}), space: S.space }; setLogAll(saved.log || []); ensureOrderId(); }
+    if (saved) { S.settings = { company: "", ...(saved.settings || {}) }; S.items = saved.items || []; S.svc = saved.svc || []; S.stock = saved.stock || null; S.cabinets = saved.cabinets || []; S.assemblers = saved.assemblers || []; S.orderBySpace = { ...(saved.orders || {}) }; if (!S.orderBySpace.cab && saved.order) S.orderBySpace.cab = saved.order; S.order = { ...blankOrder(), ...(S.orderBySpace[S.space] || {}), space: S.space }; setLogAll(saved.log || []); ensureOrderId(); }
     else { S.items = SAMPLE.items; S.cabinets = SAMPLE.cabinets; S.order = { ...blankOrder(), ...SAMPLE.order, id: rid(), date: today() }; saveOrderSoon(); }
   }
   setStatus(); render();
@@ -2543,7 +2545,7 @@ function render() {
     const f = S.loginName ? lp : ln; if (f) { f.removeAttribute("readonly"); f.focus(); } return;
   }
   if (r === "view" && ["order", "comp", "rcv", "rep", "cabs", "items", "asm"].includes(S.tab) && !S.viewTabOk) { S.tab = "hist"; }
-  const tabsEl = document.querySelectorAll("#tabs button[data-tab]"); tabsEl.forEach(b => b.hidden = r === "view" && !["hist", "dash"].includes(b.dataset.tab));
+  const tabsEl = document.querySelectorAll("#tabs button[data-tab]"); tabsEl.forEach(b => b.hidden = r === "view" && !["hist", "dash", "stock"].includes(b.dataset.tab));
   if (S.settings && Array.isArray(S.settings.ptypes) && !ptypes().some(t => t.id === S.space)) { setTimeout(() => setSpace("cab"), 0); }
   { const ni = $("#dm-new-item"); if (ni) ni.hidden = r === "view"; }
   { const box = $("#devmenu-pts"), T = ptById(S.space); if (box) box.innerHTML = `<button role="menuitem" data-tab="cabs"><span>${esc(S.space === "cab" ? "ארונות" : "מוצרים · " + T.name)}</span><span class="count">${S.cabinets.filter(c => ptOf(c) === S.space).length || ""}</span></button>`; }
@@ -2568,7 +2570,7 @@ function render() {
     : cl.state === "error" ? `<div class="cloudbar err"><div><b>☁ הסנכרון לא פעיל</b><div class="hint">${esc(cl.msg || "")}</div></div><button class="btn" data-act="dev" data-cat="sync">הגדרות סנכרון</button></div>` : "";
   const dl = S.tab !== "dash" ? delayedList() : [];
   const dban = dl.length ? `<div class="dbanner"><div>⚠ <b>${dl.reduce((a, x) => a + x.pend, 0)} ארונות</b> נמצאים אצל ספק ההרכבה יותר מ-${delayDays()} יום (${new Set(dl.map(x => x.e.id)).size} הזמנות)</div><button class="btn" data-tab="dash">הצג בדשבורד ›</button></div>` : "";
-  v.innerHTML = cbanner + dban + crumb + (S.tab === "order" ? viewOrder() : S.tab === "cabs" ? viewCabs() : S.tab === "asm" ? viewAsm() : S.tab === "hist" ? viewHist() : S.tab === "dash" ? viewDash() : S.tab === "rcv" ? viewRcv() : S.tab === "comp" ? viewComp() : S.tab === "rep" ? viewRep() : viewItems());
+  v.innerHTML = cbanner + dban + crumb + (S.tab === "order" ? viewOrder() : S.tab === "cabs" ? viewCabs() : S.tab === "asm" ? viewAsm() : S.tab === "hist" ? viewHist() : S.tab === "dash" ? viewDash() : S.tab === "rcv" ? viewRcv() : S.tab === "comp" ? viewComp() : S.tab === "rep" ? viewRep() : S.tab === "stock" ? viewStock() : viewItems());
   if (aid) { const el = document.getElementById(aid); if (el) { el.focus(); if (el.type === "number") { const v = el.value; el.value = ""; el.value = v; } else { try { if (sel != null) el.setSelectionRange(sel, sel); } catch (e) {} } } }
   applyRole();
   if (S.tab === "rcv") rcLiveUi();
@@ -2712,7 +2714,7 @@ function viewOrder() {
   const gClosed = S.grpClosed || (S.grpClosed = {});
   for (const r of rows) {
     const k = key(r);
-    if (k !== lastKey) { const g = gcnt[k], cl = !!gClosed[k]; tbody += `<tr class="grp ${cl ? "closed" : ""}" data-grpk="${esc(k)}"><td colspan="8"><button type="button" class="grpbtn" data-act="grp-tog" data-k="${esc(k)}" aria-expanded="${!cl}"><span class="grparr">▾</span>${esc(k)}<span class="grpmeta">${g.n} שורות${g.done ? ` · ${g.done} הושלמו` : ""}${g.short ? ` · <span class="gshort">${g.short} חסרים</span>` : ""}</span></button></td></tr>`; lastKey = k; }
+    if (k !== lastKey) { const g = gcnt[k], cl = !!gClosed[k]; tbody += `<tr class="grp ${cl ? "closed" : ""}" data-grpk="${esc(k)}"><td colspan="${S.stock ? 9 : 8}"><button type="button" class="grpbtn" data-act="grp-tog" data-k="${esc(k)}" aria-expanded="${!cl}"><span class="grparr">▾</span>${esc(k)}<span class="grpmeta">${g.n} שורות${g.done ? ` · ${g.done} הושלמו` : ""}${g.short ? ` · <span class="gshort">${g.short} חסרים</span>` : ""}</span></button></td></tr>`; lastKey = k; }
     const unit = esc(r.item.unit || "יח׳");
     const st = r.extra > 0 ? `<span class="stat part">עודף +${r.extra}</span>` : r.qty === 0 ? '<span class="stat wait">בוטל</span>' : r.remaining === 0 ? '<span class="stat done">הושלם</span>' : r.shipped > 0 ? '<span class="stat part">חלקי</span>' : '<span class="stat wait">טרם נשלח</span>';
     const isShort = r.remaining > 0 && r.now < r.remaining;
@@ -2721,6 +2723,7 @@ function viewOrder() {
         ${r.overridden ? `<div class="from">מחושב: ${r.calc} · <a href="#" data-act="req-reset" data-item="${r.itemId}" style="color:var(--accent)">אפס</a></div>` : ""}</td>
       <td class="c num">${r.shipped || "–"}</td>
       <td class="c num" style="font-weight:600">${r.remaining || "–"}</td>
+      ${S.stock ? (() => { const lv = stockLive(r.itemId); return `<td class="c num" style="font-weight:700;${r.remaining && lv < r.now ? "color:var(--danger)" : r.remaining && lv < r.remaining ? "color:var(--warn)" : ""}" title="מלאי חי מפריוריטי">${r.remaining ? fmtN(lv) : `<span class="from">${fmtN(lv)}</span>`}</td>`; })() : ""}
       <td class="c">${r.remaining ? `<input class="now ${r.now ? "" : "zero"}" type="number" min="0" max="${r.remaining}" inputmode="numeric" data-order data-kind="now" data-item="${r.itemId}" id="now-${r.itemId}" value="${r.now}" aria-label="כמות לשליחה עכשיו">` : ""}</td>
       <td>${st}</td>
       <td><div class="row" style="gap:4px;flex-wrap:nowrap">${isShort && altsOf(r.itemId).length ? `<button class="btn mailbtn altbtn" data-act="alt-open" data-item="${r.itemId}" title="יש פריט חלופי מאושר">🔄 חלופה (${altsOf(r.itemId).length})</button>` : ""}${isShort ? `<button class="btn mailbtn" data-act="po-mail" data-item="${r.itemId}" title="הכן הודעת חוסר לרכש – להעתקה למייל של אפקון">✉ מייל לרכש</button>` : ""}${subOf(o, r.itemId).length && !r.shipped ? `<button class="btn ghost mailbtn" data-act="alt-undo" data-item="${r.itemId}" title="בטל את השימוש בחלופה">↩ בטל חלופה</button>` : ""}</div></td></tr>`;
@@ -2807,7 +2810,7 @@ function viewOrder() {
             <div class="shp-stats"><span><b>${nowUnits}</b> יחידות</span><span><b>${nowLines}</b> שורות</span>${shortLines ? `<span class="warn"><b>${shortLines}</b> יושלמו בהמשך</span>` : ""}</div>
           </div>
           <div class="hint">ברשימה למטה (עמודת ״לשליחה עכשיו״) מורידים כמות בשורות שאין מספיק במלאי – מה שלא יוצא עכשיו יישאר ביתרה.${S.supplierFilter ? " נשלחות רק השורות של הספק המסונן." : ""}</div>
-          <div class="shp-quick"><button class="btn" data-act="pick-print" title="הדפסת רשימת הפריטים להכנה במחסן">🖨 הדפס רשימת ליקוט</button><button class="btn" data-act="now-all">↺ הכל לפי היתרה</button><button class="btn" data-act="now-zero">0 אפס הכל</button>${shortLines > 1 ? `<button class="btn mailall" data-act="po-mail" data-item="">✉ שלח הכל לרכש (${shortLines})</button>` : ""}</div>
+          <div class="shp-quick"><button class="btn" data-act="pick-print" title="הדפסת רשימת הפריטים להכנה במחסן">🖨 הדפס רשימת ליקוט</button><button class="btn" data-act="now-all">↺ הכל לפי היתרה</button><button class="btn" data-act="now-zero">0 אפס הכל</button>${S.stock ? '<button class="btn" data-act="now-stock" title="ממלא בעמודה לשליחה עכשיו לפי המלאי החי">📦 לפי המלאי</button>' : ""}${shortLines > 1 ? `<button class="btn mailall" data-act="po-mail" data-item="">✉ שלח הכל לרכש (${shortLines})</button>` : ""}</div>
           <div class="shp-fields">
             ${ships.length ? `<div class="field shp-wr"><span class="label">מס׳ תעודת ההשלמה (מפריוריטי) *</span>${grBoxes("sh", S.shipDoc, "WR")}</div>` : ""}
             <label class="field"><span class="label">תאריך משלוח</span><input id="sh-date" type="date" value="${esc(S.shipDate || today())}"></label>
@@ -2854,7 +2857,7 @@ function viewOrder() {
     </div>
     ${missing ? `<div class="card-b" style="padding-bottom:0"><span class="chip warn">${missing} פריטים בארונות נמחקו מהקטלוג ולא נכללו</span></div>` : ""}
     ${(o.subs || []).length ? `<div class="card-b altstrip"><b>🔄 חלופות בהזמנה זו:</b>${o.subs.map(sb => { const A = byId(S.items, sb.from), B = byId(S.items, sb.to); return `<span class="altchip"><span class="sku">${esc(A ? A.sku : "?")}</span> ← <span class="sku">${esc(B ? B.sku : "?")}</span> × ${sb.qty}</span>`; }).join("")}</div>` : ""}
-    ${rows.length ? `<div class="tw bomtw"><table><thead><tr><th>מק״ט</th><th>תיאור</th><th style="text-align:center">נדרש</th><th style="text-align:center">נשלח</th><th style="text-align:center">יתרה</th><th style="text-align:center">לשליחה עכשיו</th><th>מצב</th><th></th></tr></thead><tbody>${tbody}</tbody></table></div>`
+    ${rows.length ? `<div class="tw bomtw"><table><thead><tr><th>מק״ט</th><th>תיאור</th><th style="text-align:center">נדרש</th><th style="text-align:center">נשלח</th><th style="text-align:center">יתרה</th>${S.stock ? '<th style="text-align:center" title="מלאי חי מפריוריטי">📦 במלאי</th>' : ""}<th style="text-align:center">לשליחה עכשיו</th><th>מצב</th><th></th></tr></thead><tbody>${tbody}</tbody></table></div>`
       : '<div class="empty">בחר ארונות וכמויות למעלה, והבום יחושב כאן אוטומטית.</div>'}
     ${openRows.length && rows.length ? `<div class="shp-mini"><span><b>משלוח #${ships.length + 1}</b> · ${nowUnits} יחידות ב-${nowLines} שורות${shortLines ? ` · <span style="color:var(--warn)">${shortLines} יושלמו בהמשך</span>` : ""}</span><button type="button" class="btn primary" data-act="go-send">↑ להפקת התעודה</button></div>` : ""}
     <div class="card-b row" style="border-top:1px solid var(--line);justify-content:space-between">
@@ -3164,7 +3167,7 @@ const SNAP_KEY = "rackbom.snaps";
 function backupObj() {
   if (S.mode === "db") ptypes().forEach(t => subOrder(t.id));
   const raw = db && db.dumpAll ? db.dumpAll() : null;
-  return { app: "rack-bom", version: 2, date: today(), at: new Date().toISOString(), settings: S.settings, items: S.items, cabinets: S.cabinets, assemblers: S.assemblers, order: S.order, orders: { ...S.orderBySpace, [S.space]: S.order }, log: S.logAll, svc: S.svc || [], raw };
+  return { app: "rack-bom", version: 2, date: today(), at: new Date().toISOString(), settings: S.settings, items: S.items, cabinets: S.cabinets, assemblers: S.assemblers, order: S.order, orders: { ...S.orderBySpace, [S.space]: S.order }, log: S.logAll, svc: S.svc || [], stock: S.stock || null, raw };
 }
 async function loadSnaps() { try { const v = await idbKV.get(SNAP_KEY); S.snaps = Array.isArray(v) ? v : []; } catch (e) { S.snaps = S.snaps || []; } return S.snaps; }
 async function autoSnapshot(kind) {
@@ -3549,6 +3552,7 @@ async function runRestore() {
         for (const [sp, o] of Object.entries(ords)) { if (!o) continue; const v = { ...blankOrder(), ...o, space: sp }; await db.doc(orderKey(sp)).set(v); if (sp === S.space) { S.order = v; lastOrderJson = JSON.stringify(v); } else S.orderBySpace[sp] = v; } }
       if (settings) await db.doc("settings/main").set(settings);
       for (const x of (r.data.svc || [])) { const { id, ...body } = x; if (id) await db.collection("svc").doc(id).set(body); }
+      if (r.data.stock && r.data.stock.asOf) await db.doc("stock/main").set(r.data.stock);
       if (db.flush) await db.flush();
     } else {
       const merge = (cur, arr) => { const m = new Map(cur.map(x => [x.id, x])); arr.forEach(x => x.id && m.set(x.id, x)); return [...m.values()]; };
@@ -3567,6 +3571,7 @@ async function runRestore() {
         Object.entries(ords).forEach(([sp, o]) => { if (!o) return; const v = { ...blankOrder(), ...remapOrder(o), space: sp }; if (sp === S.space) S.order = v; else S.orderBySpace[sp] = v; }); }
       if (settings) S.settings = { company: "", ...settings };
       if (Array.isArray(r.data.svc)) S.svc = merge(S.svc || [], r.data.svc);
+      if (r.data.stock && r.data.stock.asOf) S.stock = { ...r.data.stock, q: rk(r.data.stock.q) };
       saveLocal();
     }
     stage = "סיום";
@@ -4710,6 +4715,152 @@ function openSvcDoc(c, kind) {
 }
 const SVC_HEAD = ["מס׳ קריאה", "תאריך קליטה", "פרויקט (לחיוב)", "שם פרויקט", "הביא", "טלפון", "מק״ט", "תיאור", "כמות", "מספר סידורי", "תעודה מקורית", "סוג תקלה", "תיאור תקלה", "ארון חלופי", "ארון חלופי נמסר", "נשלח לתיקון", "ספק / מקום", "תעודת משלוח", "חזר מתיקון", "תוצאה", "GR", "מצב עלות", "סכום ₪", "הצעת מחיר", "חויב פרויקט", "אישר", "מס׳ חיוב", "סגירה", "מצב", "ימים", "תיקון בפריוריטי", "הוחלף מהמלאי", "סוג שליחה", "ארון חדש מהספק", "זיכוי ₪", "תעודת זיכוי"];
 function svcRow(c) { const cs = c.cost || {}; return [c.no, c.date, c.proj, c.projName || "", c.broughtBy || "", c.broughtPhone || "", c.sku || "", c.name || "", c.qty || 1, c.sn || "", c.origRef || "", c.kind || "", c.defect || "", c.repMode === "replace" ? "כן" : "לא – ממתין לתיקון", c.repl ? `${c.repl.date} ${c.repl.sn || ""}` : "", c.sent ? c.sent.date : "", c.dest === "home" ? "מחסן אפקון" : c.supplierName || "", (c.sent || {}).doc || "", c.back ? c.back.date : "", c.back ? (c.back.res === "back" ? "תקין" : c.back.res === "bad" ? "עדיין פגום" : "נגרט") : "", (c.back || {}).gr || "", SVC_COST[cs.st || "none"], Number(cs.amount) || "", cs.quote || "", cs.chargeTo || c.proj || "", cs.approvedBy || "", cs.inv || "", c.close ? c.close.date : "", svcOpen(c) ? "פתוחה" : "נסגרה", svcOpen(c) ? svcDays(c) : (c.close ? Math.max(0, daysBetween(c.date, c.close.date)) : ""), c.prio || "", c.simple ? (c.fromStock === false ? "לא" : "כן") : (c.repMode === "replace" ? "כן" : "לא"), c.sendType === "return" ? "החזרה לספק" : c.sent ? "תיקון" : "", (c.back || {}).newSn || "", (c.back || {}).credit || "", (c.back || {}).creditNo || ""]; }
+/* =================== מלאי חי מפריוריטי =================== */
+/* מלאי נטען מקובץ פריוריטי לנקודת זמן (asOf). מלאי חי = הכמות בקובץ פחות כל מה שיצא בתעודות משלוח / השלמה שהופקו אחרי אותה נקודה */
+let _stMemo = null, _stKey = "", _stLog = null;
+function stockOut() {
+  const st = S.stock; if (!st || !st.asOf) return { out: {}, ships: 0 };
+  const o0 = S.order || {}, key = [st.asOf, S.dataVer || 0, o0.id || "", JSON.stringify((o0.shipments || []).map(x => x.lines)).length].join("|");
+  if (_stMemo && key === _stKey && _stLog === S.logAll) return _stMemo;
+  const ords = new Map();
+  (S.logAll || []).forEach(e => e && e.order && ords.set(e.id, e.order));
+  Object.values(S.orderBySpace || {}).forEach(o => o && o.id && !ords.has(o.id) && ords.set(o.id, o));
+  if (o0.id) ords.set(o0.id, o0);
+  const out = {}; let ships = 0;
+  ords.forEach(o => (o.shipments || []).forEach(sh => { if (!sh.at || sh.at <= st.asOf) return; ships++; Object.entries(sh.lines || {}).forEach(([id, q]) => out[id] = (out[id] || 0) + (Number(q) || 0)); }));
+  _stMemo = { out, ships }; _stKey = key; _stLog = S.logAll; return _stMemo;
+}
+function stockLive(id) { if (!S.stock) return null; return (Number((S.stock.q || {})[id]) || 0) - (stockOut().out[id] || 0); }
+/* הפריטים שבתחום המלאי: מק״טי הארונות עצמם וכל האביזרים שבארונות (כל הלשוניות) */
+function stockScope() {
+  const s = new Set();
+  S.cabinets.forEach(c => { if (c.baseItemId) s.add(c.baseItemId); (c.lines || []).forEach(l => l.itemId && s.add(l.itemId)); });
+  return s;
+}
+const fmtN = n => (Math.round(n * 100) / 100).toLocaleString("he-IL");
+function localDT(d) { const p = n => String(n).padStart(2, "0"); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; }
+function parseNum(v) { const s0 = String(v == null ? "" : v).replace(/[,\s₪]/g, "").replace(/^\((.*)\)$/, "-$1"); if (!/^-?\d+(\.\d+)?-?$/.test(s0)) return null; return s0.endsWith("-") ? -Number(s0.slice(0, -1)) : Number(s0); }
+function stockGuess(rows) {
+  const w = Math.min(30, rows.reduce((m, r) => Math.max(m, (r || []).length), 0)), cell = (r, c) => String((r || [])[c] ?? "").trim();
+  let hr = -1, sku = -1, qty = -1, wh = -1;
+  for (let h = 0; h < Math.min(12, rows.length) && hr < 0; h++) {
+    let q = -1, q2 = -1, sk = -1, wh0 = -1;
+    for (let c = 0; c < w; c++) { const v = cell(rows[h], c);
+      if (q < 0 && /יתרה|מלאי|balance|on\s*hand/i.test(v)) q = c;
+      else if (q2 < 0 && /כמות|qty|quant/i.test(v)) q2 = c;
+      if (sk < 0 && /מק.?ט|קוד\s*פריט|part|sku|catalog/i.test(v)) sk = c;
+      if (wh0 < 0 && /מחסן|warehouse/i.test(v)) wh0 = c; }
+    if (q >= 0 || q2 >= 0) { hr = h; qty = q >= 0 ? q : q2; sku = sk; wh = wh0; }
+  }
+  const body = rows.slice(hr + 1, hr + 400);
+  if (sku < 0) { let best = -1; for (let c = 0; c < w; c++) { if (c === qty) continue; const n = body.filter(r => stockFind(cell(r, c))).length; if (n > best) { best = n; sku = c; } } }
+  if (qty < 0) { let best = -1; for (let c = 0; c < w; c++) { if (c === sku) continue; const n = body.filter(r => parseNum(cell(r, c)) !== null).length; if (n > best) { best = n; qty = c; } } }
+  return { headerRow: hr, sku, qty, wh };
+}
+let _sfIdx = null, _sfItems = null;
+function stockFind(v) {
+  if (_sfItems !== S.items) { const a = new Map(), b = new Map(); S.items.forEach(it => { const k = String(it.sku || "").trim().toLowerCase(); if (!k) return; a.set(k, it); if (/^\d+$/.test(k)) b.set(k.replace(/^0+/, ""), it); }); _sfIdx = { a, b }; _sfItems = S.items; }
+  const k = String(v == null ? "" : v).trim().toLowerCase(); if (!k) return null;
+  return _sfIdx.a.get(k) || (/^\d+$/.test(k) ? _sfIdx.b.get(k.replace(/^0+/, "")) : null) || null;
+}
+function stockPlan(d) {
+  const m = d.map, rows = d.rows.slice(m.headerRow + 1), scope = stockScope(), q = {}, whVals = new Map();
+  let matched = 0, notScope = 0, unknown = 0, badQty = 0;
+  const cell = (r, c) => String((r || [])[c] ?? "").trim();
+  rows.forEach(r => {
+    const skuV = cell(r, m.sku); if (!skuV) return;
+    const whV = m.wh >= 0 ? cell(r, m.wh) || "(ללא)" : "";
+    if (m.wh >= 0) whVals.set(whV, (whVals.get(whV) || 0) + 1);
+    if (m.wh >= 0 && d.whSel && !d.whSel.has(whV)) return;
+    const it = stockFind(skuV); if (!it) { unknown++; return; }
+    if (!scope.has(it.id)) { notScope++; return; }
+    const n = parseNum(cell(r, m.qty)); if (n === null) { badQty++; return; }
+    q[it.id] = (q[it.id] || 0) + n; matched++;
+  });
+  return { q, whVals, matched, notScope, unknown, badQty, items: Object.keys(q).length, scope: scope.size };
+}
+async function stockReadFile(f) {
+  let rows; try { rows = await readRows(f); } catch (e) { draft.stk = { error: "לא הצלחתי לקרוא את הקובץ. שמור אותו כ-xlsx או CSV ונסה שוב." }; return; }
+  if (!rows.length) { draft.stk = { error: "הקובץ ריק." }; return; }
+  draft.stk = { rows, file: f.name, map: stockGuess(rows), whSel: null, asOf: localDT(new Date()) };
+}
+function stockImpBody() {
+  const d = draft.stk, cs = stockScope().size;
+  const drop = `<div class="drop" id="stk-drop"><div>גרור לכאן את קובץ המלאי שיוצא מפריוריטי (Excel או CSV)</div>
+    <label class="btn primary" style="cursor:pointer">בחר קובץ<input type="file" id="stk-file" accept=".xlsx,.xls,.csv,.txt" style="display:none"></label></div>`;
+  const intro = `<div class="hint">מייבאים מפריוריטי דוח יתרות מלאי (מק״ט + כמות). נטענים רק הפריטים שנמצאים בארונות – מק״טי הארונות והאביזרים שבהם (${cs} פריטים). שאר השורות בקובץ מדולגות. ייבוא חדש מחליף את המלאי הקודם.</div>`;
+  if (!d || d.error) return intro + (d && d.error ? `<div class="chip warn">${esc(d.error)}</div>` : "") + drop;
+  const p = stockPlan(d), m = d.map, w = Math.min(30, d.rows.reduce((x, r) => Math.max(x, (r || []).length), 0));
+  const ex = c => { const r = d.rows.find((r, k) => k > m.headerRow && String((r || [])[c] ?? "").trim()); return r ? String(r[c]).slice(0, 24) : ""; };
+  const hd = c => m.headerRow >= 0 ? String((d.rows[m.headerRow] || [])[c] ?? "").trim() : "";
+  const sel = (id, v, none) => `<select id="${id}" class="stkcol" style="width:auto">${none ? `<option value="-1" ${v < 0 ? "selected" : ""}>— אין —</option>` : ""}${[...Array(w)].map((_, c) => `<option value="${c}" ${c === v ? "selected" : ""}>${COLS[c] || c + 1}${hd(c) ? " · " + esc(hd(c)) : ""}${ex(c) ? " – " + esc(ex(c)) : ""}</option>`).join("")}</select>`;
+  const whs = [...p.whVals.keys()].sort(collator.compare);
+  const prev = Object.entries(p.q).map(([id, n]) => ({ it: byId(S.items, id), n })).filter(x => x.it).sort((a, b) => collator.compare(a.it.sku, b.it.sku));
+  return `${intro}
+    <div><b>📄 ${esc(d.file)}</b> · ${d.rows.length.toLocaleString("he-IL")} שורות${m.headerRow >= 0 ? " · שורת כותרת זוהתה" : ""}</div>
+    <div class="row" style="gap:14px;padding:8px 10px;border:1px dashed var(--line-strong);border-radius:8px;flex-wrap:wrap"><b>עמודות:</b>
+      <label class="row" style="gap:6px">מק״ט ${sel("stk-csku", m.sku)}</label><label class="row" style="gap:6px">כמות ${sel("stk-cqty", m.qty)}</label><label class="row" style="gap:6px">מחסן ${sel("stk-cwh", m.wh, true)}</label><span class="hint">זוהו אוטומטית – אפשר לשנות</span></div>
+    ${whs.length > 1 ? `<div class="field"><span class="label">מחסנים לכלול (${whs.length})</span><div class="snpick-l">${whs.map(v => `<label class="snchip"><input type="checkbox" class="stk-wh" value="${esc(v)}" ${!d.whSel || d.whSel.has(v) ? "checked" : ""}><span>${esc(v)}</span><span class="from">${p.whVals.get(v)}</span></label>`).join("")}</div></div>` : ""}
+    <label class="field" style="max-width:260px"><span class="label">המלאי בקובץ נכון לתאריך ושעה *</span><input id="stk-asof" type="datetime-local" value="${esc(d.asOf)}"></label>
+    <span class="hint">כל משלוח שהופק באפליקציה אחרי השעה הזו יורד אוטומטית מהמלאי.</span>
+    <div class="sys-grid">
+      <div class="sys-t"><span>פריטי ארונות שנטענו</span><b style="color:var(--earth)">${p.items.toLocaleString("he-IL")}</b><small>מתוך ${p.scope} פריטים בארונות</small></div>
+      <div class="sys-t"><span>דולגו – לא בארונות</span><b>${p.notScope.toLocaleString("he-IL")}</b></div>
+      <div class="sys-t"><span>דולגו – לא בקטלוג</span><b>${p.unknown.toLocaleString("he-IL")}</b></div>
+      ${p.badQty ? `<div class="sys-t"><span>כמות לא תקינה</span><b style="color:var(--warn)">${p.badQty}</b></div>` : ""}
+      <div class="sys-t"><span>פריטי ארונות שלא בקובץ</span><b>${(p.scope - p.items).toLocaleString("he-IL")}</b><small>ייחשבו כמלאי 0</small></div>
+    </div>
+    ${prev.length ? `<div class="tw" style="max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:6px"><table><thead><tr><th>מק״ט</th><th>תיאור</th><th class="c">כמות</th></tr></thead><tbody>${prev.slice(0, 200).map(x => `<tr><td><span class="sku">${esc(x.it.sku)}</span></td><td>${esc(x.it.name)}</td><td class="c num">${fmtN(x.n)}</td></tr>`).join("")}</tbody></table></div>` : '<div class="chip warn">לא נמצאו בקובץ פריטים מהארונות – בדוק את עמודת המק״ט</div>'}
+    <div id="stk-err" class="chip warn" hidden></div>
+    <div class="row"><button class="btn primary" data-act="stock-save" ${prev.length ? "" : "disabled"}>💾 שמור מלאי (${p.items} פריטים)</button><button class="btn ghost" data-act="stock-reset">בחר קובץ אחר</button></div>`;
+}
+function openStockImp() {
+  if (!draft || draft.type !== "stk") draft = { type: "stk", stk: null };
+  drawer("📥 טעינת מלאי מפריוריטי", stockImpBody(), `<span class="hint">${S.stock ? `המלאי הנוכחי נכון ל-${esc(fmtDT(Date.parse(S.stock.asOf)))}` : "עדיין לא נטען מלאי"}</span><button class="btn" data-act="close">סגור</button>`);
+  const dd = document.querySelector(".drawer"); if (dd) dd.style.width = "min(900px,100%)";
+  const drop = $("#stk-drop");
+  if (drop) { drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("over"); }); drop.addEventListener("dragleave", () => drop.classList.remove("over")); drop.addEventListener("drop", async e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) { await stockReadFile(f); openStockImp(); } }); }
+}
+function refreshStockImp() { const b = document.querySelector(".drawer-b"); if (!b || !draft || draft.type !== "stk") return; const st = b.scrollTop; b.innerHTML = stockImpBody(); b.scrollTop = st; applyRole(); }
+async function saveStock(st) {
+  S.stock = st; _stMemo = null;
+  if (S.mode === "db") await db.doc("stock/main").set(JSON.parse(JSON.stringify(st)));
+  else saveLocal();
+}
+function stockRows() {
+  const scope = stockScope(), st = S.stock || { q: {} }, so = stockOut().out, open = {}, cur = {}, cabsOf = {};
+  openShortEntries().forEach(e => (e.short || []).forEach(x => { if (x.itemId) open[x.itemId] = (open[x.itemId] || 0) + (Number(x.miss) || 0); }));
+  try { if (S.order && hasContent(S.order)) computeBom(S.order).all.forEach(r => { if (r.remaining > 0) cur[r.itemId] = r.remaining; }); } catch (e) {}
+  S.cabinets.forEach(c => { (c.lines || []).forEach(l => (cabsOf[l.itemId] = cabsOf[l.itemId] || new Set()).add(c.sku)); if (c.baseItemId) (cabsOf[c.baseItemId] = cabsOf[c.baseItemId] || new Set()).add("ארון מוגמר"); });
+  return [...new Set([...scope, ...Object.keys(st.q || {})])].map(id => {
+    const it = byId(S.items, id); if (!it) return null;
+    const base = Number((st.q || {})[id]) || 0, out = so[id] || 0, live = base - out, om = open[id] || 0, cn = cur[id] || 0;
+    const stt = live <= 0 ? (om || cn ? "out" : "zero") : om ? "can" : cn > live ? "low" : "ok";
+    return { id, it, base, out, live, open: om, cur: cn, st: stt, inFile: (st.q || {})[id] !== undefined, cabs: [...(cabsOf[id] || [])] };
+  }).filter(Boolean).sort((a, b) => collator.compare(a.it.sku || "", b.it.sku || ""));
+}
+const ST_LBL = { out: ["אזל – נדרש", "bad"], zero: ["אין במלאי", "wait"], can: ["אפשר להשלים חוסר", "part"], low: ["לא מספיק להזמנה", "part"], ok: ["במלאי", "done"] };
+function viewStock() {
+  const st = S.stock, canImp = ["dev", "full", "open"].includes(role());
+  if (!st) return `<div class="card"><div class="empty">עדיין לא נטען מלאי מפריוריטי.<br>מייבאים דוח יתרות מלאי (מק״ט + כמות), ונשמרים רק פריטי הארונות והאביזרים שבהם. כל משלוח שמופק באפליקציה מוריד מהמלאי אוטומטית.<br><br>${canImp ? '<button class="btn primary" data-act="stock-imp">📥 טען קובץ מלאי מפריוריטי</button>' : ""}</div></div>`;
+  const all = stockRows(), f = S.stF || "all", q = String(S.stQ || "").trim(), so = stockOut();
+  const cnt = k => all.filter(x => k === "all" || (k === "out" ? x.live <= 0 : k === "can" ? x.st === "can" : k === "low" ? x.st === "low" || x.st === "out" : false)).length;
+  const list = all.filter(x => (f === "all" || (f === "out" ? x.live <= 0 : f === "can" ? x.st === "can" : x.st === "low" || x.st === "out")) && (!q || smatch(`${x.it.sku} ${x.it.name} ${x.it.category || ""} ${x.it.supplier || ""} ${x.cabs.join(" ")}`, q)));
+  const age = Math.floor((Date.now() - Date.parse(st.asOf)) / 864e5);
+  const tile = (k, l, color) => `<button class="tile ${f === k ? "on" : ""}" data-act="stock-f" data-f="${k}"><span class="label">${l}</span><b style="color:${color}">${cnt(k)}</b><span class="tile-go">${f === k ? "מוצג ▾" : "הצג ›"}</span></button>`;
+  return `<div class="card"><div class="card-h"><div><h2>📦 מלאי חי – פריטי ארונות</h2>
+      <div class="from">מפריוריטי נכון ל-<b>${esc(fmtDT(Date.parse(st.asOf)))}</b>${st.file ? ` · ${esc(st.file)}` : ""}${st.by ? ` · נטען ע״י ${esc(st.by)}` : ""} · מאז יצאו ${so.ships} משלוחים מהאפליקציה${age > 7 ? ` · <b style="color:var(--warn)">⚠ המלאי בן ${age} ימים – כדאי לטעון קובץ עדכני</b>` : ""}</div></div>
+      <div class="row" style="gap:6px">${canImp ? '<button class="btn primary" data-act="stock-imp">📥 טען מלאי מעודכן</button>' : ""}<button class="btn" data-act="stock-xl">⬇ אקסל</button></div></div></div>
+    <div class="strip tiles">${tile("all", "פריטי ארונות", "inherit")}${tile("can", "יש במלאי לחוסר פתוח", "var(--earth)")}${tile("low", "לא מספיק / אזל ונדרש", "var(--warn)")}${tile("out", "אין במלאי", "var(--danger)")}</div>
+    <div class="card"><div class="card-h"><input class="search" id="st-q" type="search" autocomplete="off" placeholder="חיפוש לפי מק״ט, תיאור, קטגוריה או ארון" value="${esc(S.stQ || "")}"><span class="hint">${list.length} פריטים · מלאי חי = הכמות מפריוריטי פחות מה שיצא בתעודות שהופקו אחרי מועד הקובץ</span></div>
+    ${list.length ? `<div class="tw"><table><thead><tr><th>מק״ט</th><th>תיאור</th><th>בארונות</th><th class="c">מפריוריטי</th><th class="c">יצא מאז</th><th class="c">מלאי חי</th><th class="c">חסר בהזמנות פתוחות</th><th class="c">נדרש להזמנה הנוכחית</th><th>מצב</th></tr></thead><tbody>
+      ${list.slice(0, 500).map(x => `<tr class="${x.st === "out" ? "shortrow" : ""}"><td><span class="sku">${esc(x.it.sku)}</span></td><td>${esc(x.it.name)}${x.it.category ? `<div class="from">${esc(x.it.category)}</div>` : ""}</td><td class="from">${esc(x.cabs.slice(0, 3).join(", "))}${x.cabs.length > 3 ? ` +${x.cabs.length - 3}` : ""}</td>
+        <td class="c num">${x.inFile ? fmtN(x.base) : '<span class="from">—</span>'}</td><td class="c num">${x.out ? "−" + fmtN(x.out) : "–"}</td>
+        <td class="c num" style="font-weight:700;font-size:16px;color:${x.live <= 0 ? "var(--danger)" : "inherit"}">${fmtN(x.live)} <span class="from" style="font-weight:400">${esc(x.it.unit || "יח׳")}</span></td>
+        <td class="c num">${x.open ? `<span style="color:var(--danger);font-weight:700">${fmtN(x.open)}</span>` : "–"}</td><td class="c num">${x.cur ? fmtN(x.cur) : "–"}</td>
+        <td><span class="stat ${ST_LBL[x.st][1]}">${ST_LBL[x.st][0]}</span>${x.st === "can" ? ` <button class="btn ghost mailbtn" data-tab="comp">להשלמה ›</button>` : ""}</td></tr>`).join("")}
+    </tbody></table></div>${list.length > 500 ? `<div class="card-b hint">מוצגים 500 מתוך ${list.length} – השתמש בחיפוש</div>` : ""}` : '<div class="empty">אין פריטים שמתאימים לסינון</div>'}</div>`;
+}
 /* =================== v141 – תיקונים והחזרות לספק =================== */
 const REP_DEST = { same: "החזרה לתיקון אצל ספק ההרכבה", other: "תיקון אצל ספק אחר", home: "תיקון במחסן אפקון" };
 const REP_KINDS = ["נזק פיזי (מכה / שבר / שריטה)", "חיווט שגוי או חסר", "רכיב פגום", "הרכבה לא תקינה", "חוסר בפריטים", "אחר"];
@@ -5582,7 +5733,7 @@ document.addEventListener("click", async e => {
   if (t.dataset.act === "user-pw") { const n = $("#nu-name"), p = $("#nu-pass"), r = $("#nu-role"); if (n) n.value = t.dataset.name; if (r) r.value = t.dataset.role; if (p) { p.value = ""; p.scrollIntoView({ block: "center" }); p.focus(); } toast(`הקלד סיסמה חדשה ל${t.dataset.name} ולחץ "הוסף / עדכן"`); return; }
   if (t.dataset.act === "pw-eye") { e.preventDefault(); const i = $("#" + (t.dataset.for || "login-pass")); if (!i) return; const show = !i.classList.toggle("masked"); t.classList.toggle("on", show); t.setAttribute("aria-label", show ? "הסתר סיסמה" : "הצג סיסמה"); i.removeAttribute("readonly"); i.focus(); try { i.setSelectionRange(i.value.length, i.value.length); } catch (err) {} return; }
   if (rl === "none" && t.dataset.act !== "login") return;
-  if (rl === "view" && (t.dataset.tab ? !["hist", "dash"].includes(t.dataset.tab) : !VIEW_ACTS.has(t.dataset.act))) { e.preventDefault(); toast("הרשאת צפייה בלבד"); return; }
+  if (rl === "view" && (t.dataset.tab ? !["hist", "dash", "stock"].includes(t.dataset.tab) : !VIEW_ACTS.has(t.dataset.act))) { e.preventDefault(); toast("הרשאת צפייה בלבד"); return; }
   if (rl === "full" && DEV_ONLY_ACTS.has(t.dataset.act)) { e.preventDefault(); toast("פעולה זו למפתח בלבד"); return; }
   if (t.dataset.tab) logTab(t.dataset.tab);
   if (t.dataset.tab) { if (t.dataset.pt) setSpace(t.dataset.pt); S.tab = t.dataset.tab; S.devMenu = false; S.hFilter = null; S.hOpen = {}; render(); window.scrollTo(0, 0); return; }
@@ -5847,6 +5998,21 @@ document.addEventListener("click", async e => {
     }
     case "req-reset": { const ov = { ...(o.reqOverride || {}) }; delete ov[t.dataset.item]; o.reqOverride = ov; saveOrderSoon(); render(); break; }
     case "now-all": o.sendNow = {}; saveOrderSoon(); render(); break;
+    case "now-stock": { const { rows } = computeBom(); o.sendNow = { ...(o.sendNow || {}) }; let cut = 0; rows.forEach(r => { if (!r.remaining) return; const v = Math.min(r.remaining, Math.max(0, Math.floor(stockLive(r.itemId) || 0))); o.sendNow[r.itemId] = v; if (v < r.remaining) cut++; }); saveOrderSoon(); render(); toast(cut ? `הכמויות עודכנו לפי המלאי – ${cut} שורות חסרות במלאי` : "✔ יש במלאי את כל הפריטים"); break; }
+    case "stock-imp": openStockImp(); break;
+    case "stock-reset": draft.stk = null; openStockImp(); break;
+    case "stock-f": S.stF = t.dataset.f; render(); break;
+    case "stock-xl": { const r2 = stockRows(); await exportSheet("מלאי-חי", "מלאי חי", ["מק״ט", "תיאור", "קטגוריה", "יחידה", "בארונות", "מפריוריטי", "יצא מאז", "מלאי חי", "חסר בהזמנות פתוחות", "נדרש להזמנה הנוכחית", "מצב"], r2.map(x => [x.it.sku, x.it.name, x.it.category || "", x.it.unit || "יח׳", x.cabs.join(", "), x.base, x.out, x.live, x.open, x.cur, ST_LBL[x.st][0]]), true); break; }
+    case "stock-save": {
+      const d = draft.stk; if (!d || !d.rows) break; const err = m => { const x = $("#stk-err"); x.textContent = m; x.hidden = false; };
+      const asOf = val("#stk-asof"); if (!asOf) return err("חובה לבחור לאיזה תאריך ושעה המלאי בקובץ נכון");
+      const asIso = new Date(asOf).toISOString(); if (asIso > new Date(Date.now() + 6e4).toISOString()) return err("התאריך לא יכול להיות בעתיד");
+      const p = stockPlan(d); if (!p.items) return err("לא נמצאו פריטי ארונות בקובץ");
+      try { await saveStock({ asOf: asIso, at: new Date().toISOString(), by: whoAmI(), file: d.file, wh: d.whSel ? [...d.whSel] : null, q: p.q }); }
+      catch (e2) { return err("השמירה נכשלה – נסה שוב"); }
+      logAct("טעינת מלאי מפריוריטי", `${d.file} · ${p.items} פריטים`);
+      closeDrawer(); S.tab = "stock"; render(); window.scrollTo(0, 0); toast(`✔ המלאי נטען – ${p.items} פריטי ארונות`); break;
+    }
     case "now-zero": { const { rows } = computeBom(); o.sendNow = { ...(o.sendNow || {}) }; rows.forEach(r => { if (r.remaining) o.sendNow[r.itemId] = 0; }); saveOrderSoon(); render(); break; }
     case "ship": {
       if (!o.cabSnap) o.cabSnap = {};
@@ -6380,7 +6546,7 @@ document.addEventListener("click", async e => {
     case "snap-restore": {
       const sn = (S.snaps || []).find(x => x.date === S.snapSel); if (!sn) { toast("בחר תאריך לשחזור"); break; }
       if (!t.dataset.armed) { t.dataset.armed = "1"; t.textContent = `לחץ שוב לשחזור מ-${fmtDate(sn.date)}`; t.classList.add("arm"); break; }
-      const d = sn.data; draft.restore = { data: { items: d.items || [], cabinets: d.cabinets || [], assemblers: d.assemblers || [], log: d.log || [], order: d.order || null, orders: d.orders || null, settings: d.settings || null, svc: d.svc || null, raw: d.raw || null } };
+      const d = sn.data; draft.restore = { data: { items: d.items || [], cabinets: d.cabinets || [], assemblers: d.assemblers || [], log: d.log || [], order: d.order || null, orders: d.orders || null, settings: d.settings || null, svc: d.svc || null, stock: d.stock || null, raw: d.raw || null } };
       await runRestore(); break;
     }
     case "restore-go": await runRestore(); break;
@@ -6610,6 +6776,7 @@ document.addEventListener("input", e => {
   if (role() === "none") return;
   if (role() === "view" && !VIEW_INPUTS.has(t.id) && t.type !== "search") return;
   if (t.id === "search") { S.q = t.value; render(); return; }
+  if (t.id === "st-q") { S.stQ = t.value; clearTimeout(window.__stq); window.__stq = setTimeout(() => { render(); const el = $("#st-q"); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }, 250); return; }
   if (t.classList && (t.classList.contains("rc-bad") || t.classList.contains("rc-q")) && S.rcSel) {
     const id = t.dataset.cab, gEl = $(`#rcq-${id}`), bEl = $(`#rcb-${id}`); if (!gEl) return;
     const room = Number(gEl.dataset.room) || 0, left = Number(gEl.dataset.left) || 0;
@@ -6731,6 +6898,10 @@ document.addEventListener("change", e => {
   }
   if (role() === "view" && !VIEW_INPUTS.has(t.id) && t.type !== "search") return;
   if (role() === "none") return;
+  if (t.id === "stk-file" && t.files[0]) { stockReadFile(t.files[0]).then(openStockImp); return; }
+  if (t.classList && t.classList.contains("stkcol") && draft && draft.stk) { const m = draft.stk.map; m[t.id === "stk-csku" ? "sku" : t.id === "stk-cqty" ? "qty" : "wh"] = Number(t.value); if (t.id === "stk-cwh") draft.stk.whSel = null; refreshStockImp(); return; }
+  if (t.classList && t.classList.contains("stk-wh") && draft && draft.stk) { draft.stk.whSel = new Set([...document.querySelectorAll(".stk-wh:checked")].map(x => x.value)); refreshStockImp(); return; }
+  if (t.id === "stk-asof" && draft && draft.stk) { draft.stk.asOf = t.value; return; }
   if (t.id === "prune-alts" && draft) { draft.pruneAlts = t.checked; const sec = $("#prune-sec"); if (sec) sec.outerHTML = pruneSecHtml(); return; }
   if (t.id === "imp-file" && t.files[0]) { handleImportFile(t.files[0]); return; }
   if (t.id === "act-u" || t.id === "act-from" || t.id === "act-to") { S.actF = { ...(S.actF || {}), [t.id.slice(4) === "u" ? "u" : t.id.slice(4)]: t.value }; renderActivity(); return; }
@@ -6742,7 +6913,7 @@ document.addEventListener("change", e => {
   if (t.id === "restore-file" && t.files[0]) {
     const f = t.files[0];
     f.text().then(txt => {
-      try { const j = JSON.parse(txt); if (!Array.isArray(j.items)) throw 0; draft.restore = { data: { items: j.items || [], cabinets: j.cabinets || [], assemblers: j.assemblers || [], log: j.log || [], order: j.order || null, orders: j.orders || null, settings: j.settings || null, svc: j.svc || null, raw: j.raw || null } }; }
+      try { const j = JSON.parse(txt); if (!Array.isArray(j.items)) throw 0; draft.restore = { data: { items: j.items || [], cabinets: j.cabinets || [], assemblers: j.assemblers || [], log: j.log || [], order: j.order || null, orders: j.orders || null, settings: j.settings || null, svc: j.svc || null, stock: j.stock || null, raw: j.raw || null } }; }
       catch (e) { draft.restore = { error: `הקובץ "${f.name}" הוא לא קובץ גיבוי של האפליקציה. בחר את הקובץ ששמו מתחיל ב-BOM-backup.` }; }
       refreshDev();
     });
