@@ -1950,6 +1950,13 @@ function gsAdapter(cfg) {
       window.addEventListener("beforeunload", e => { savePending(); if (queue.size || inflightOps.size) { flush(); e.preventDefault(); e.returnValue = ""; } });
     },
     pending: () => queue.size + inflightOps.size,
+    /* מחיקת הרבה פריטים בבת אחת – עדכון אחד לכל דלי, ורשימת מחיקה שהשרת מבצע */
+    async deleteItems(ids) {
+      const g = {};
+      ids.forEach(id => { const b = bucket(id); if (!g[b]) g[b] = { ...((cache.get(b) || {}).v || {}) }; delete g[b][id]; (itemDel[b] = itemDel[b] || new Set()).add(id); });
+      Object.entries(g).forEach(([b, m]) => setKey(b, m));
+      await flush();
+    },
     /* גיבוי מלא: כל השורות בגיליון data כפי שהן (כולל הגדרות, משתמשים, כל הלשוניות, הזמנות פתוחות והיסטוריה) */
     dumpAll() { const o = {}; cache.forEach((x, k) => { if (x.v != null) o[k] = x.raw; }); return o; },
     async restoreAll(map) { const keys = []; Object.entries(map || {}).forEach(([k, raw]) => { const v = parse(raw); if (v === undefined || v === null) return; const r2 = JSON.stringify(v); cache.set(k, { raw: r2, v: JSON.parse(r2) }); queue.set(k, r2); keys.push(k); }); savePending(); persist(); emit(keys); schedule(); return keys.length; }
@@ -3057,6 +3064,38 @@ function planImport(rows, map) {
   return { plan, header, noSku, dupes: clean.filter(r => r[0]).length - seen.size, map };
 }
 // פריטים שיובאו בעמודות שגויות: התיאור הוא רק מספר (כנראה המק״ט האמיתי) ולא בשימוש בארון
+/* כל הפריטים שנמצאים בשימוש: בארונות (כולל גרסאות קודמות), ובכל הזמנה / תעודה / היסטוריה – כדי שתעודות ישנות לא יישברו */
+function itemUsage(keepAlts) {
+  const cab = new Set(), hist = new Set();
+  const lines = (set, ls) => (ls || []).forEach(l => l && l.itemId && set.add(l.itemId));
+  const keys = (set, o) => Object.keys(o || {}).forEach(k => set.add(k));
+  const cabDef = (set, c) => { if (!c) return; if (c.baseItemId) set.add(c.baseItemId); lines(set, c.lines); (c.revRepl || c.repl || []).forEach(r => { set.add(r.from); set.add(r.to); }); };
+  S.cabinets.forEach(c => { cabDef(cab, c); (c.revs || []).forEach(r => cabDef(cab, r)); });
+  const orders = [...(S.logAll || []).map(e => e.order), ...Object.values(S.orderBySpace || {}), S.order];
+  orders.forEach(o => { if (!o) return; lines(hist, o.extras); (o.subs || []).forEach(x => { hist.add(x.from); hist.add(x.to); }); keys(hist, o.reqOverride); keys(hist, o.sendNow); (o.shipments || []).forEach(sh => keys(hist, sh.lines)); Object.values(o.cabSnap || {}).forEach(c => cabDef(hist, c)); });
+  (S.logAll || []).forEach(e => (e.short || []).forEach(x => x.itemId && hist.add(x.itemId)));
+  const keep = new Set([...cab, ...hist]), alts = new Set();
+  if (keepAlts) [...keep].forEach(id => altsOf(id).forEach(x => { if (!keep.has(x.id)) alts.add(x.id); }));
+  alts.forEach(id => keep.add(id));
+  const drop = S.items.filter(i => !keep.has(i.id));
+  const has = id => S.items.some(i => i.id === id);
+  return { cab: [...cab].filter(has).length, histOnly: [...hist].filter(id => !cab.has(id) && has(id)).length, alts: alts.size, keep: S.items.length - drop.length, drop };
+}
+function pruneSecHtml() {
+  const keepAlts = !draft || draft.pruneAlts !== false, u = itemUsage(keepAlts);
+  return `<div class="devsec" id="prune-sec" style="border-color:var(--warn)">
+      <h3>🧹 ניקוי קטלוג הפריטים – השאר רק פריטים שבשימוש</h3>
+      <div class="hint">מוחק מהקטלוג כל פריט שלא נמצא באף ארון / מוצר. פריטים שמופיעים בהזמנות, בתעודות משלוח או בהיסטוריה נשארים, כדי שהתעודות הישנות ימשיכו להציג את המק״ט והתיאור. לפני המחיקה נשמר גיבוי אוטומטי ("שחזור לתאריך"). פריטים חדשים מוסיפים כרגיל.</div>
+      <div class="sys-grid">
+        <div class="sys-t"><span>בקטלוג עכשיו</span><b>${S.items.length.toLocaleString("he-IL")}</b></div>
+        <div class="sys-t"><span>נמצאים בארונות</span><b style="color:var(--earth)">${u.cab.toLocaleString("he-IL")}</b></div>
+        <div class="sys-t"><span>רק בהזמנות / היסטוריה</span><b>${u.histOnly.toLocaleString("he-IL")}</b><small>נשארים</small></div>
+        <div class="sys-t"><span>יימחקו</span><b style="color:var(--danger)">${u.drop.length.toLocaleString("he-IL")}</b><small>יישארו ${u.keep.toLocaleString("he-IL")}</small></div>
+      </div>
+      <label class="row" style="gap:6px"><input type="checkbox" id="prune-alts" style="width:auto" ${keepAlts ? "checked" : ""}> השאר גם פריטים חלופיים מאושרים של פריטים שנשארים${u.alts ? ` (${u.alts})` : ""}</label>
+      ${u.drop.length ? `<div class="row" style="gap:6px"><button class="btn" data-act="prune-xl">⬇ רשימת הפריטים שיימחקו (אקסל)</button><button class="btn danger" data-act="prune-go" ${draft && draft.pruning ? "disabled" : ""}>${draft && draft.pruning ? "מוחק…" : `🧹 מחק ${u.drop.length.toLocaleString("he-IL")} פריטים שלא בשימוש`}</button></div>` : '<div class="okline">✔ הקטלוג כבר מכיל רק פריטים שבשימוש</div>'}
+    </div>`;
+}
 function badItems() {
   const used = new Set(); S.cabinets.forEach(c => { if (c.baseItemId) used.add(c.baseItemId); (c.lines || []).forEach(l => used.add(l.itemId)); });
   return S.items.filter(i => /^\d{5,}$/.test(String(i.name || "").trim()) && !used.has(i.id));
@@ -3255,6 +3294,7 @@ function devBody() {
       <h3>⚠ ${b.length} פריטים בקטלוג יובאו בעמודות שגויות</h3>
       <div class="hint">בפריטים האלה התיאור הוא רק מספר (למשל מק״ט <span class="sku">${esc(b[0].sku)}</span> עם תיאור <span class="sku">${esc(b[0].name)}</span>) – כנראה הקובץ יובא כשהמק״ט והתיאור בעמודות אחרות. הם לא בשימוש באף ארון. מחק אותם וייבא את הקובץ מחדש – האפליקציה תזהה את העמודות הנכונות.</div>
       <div><button class="btn danger" data-act="bad-del">מחק ${b.length} פריטים שגויים</button></div></div>` : ""; })()}
+    ${pruneSecHtml()}
     <div class="devsec">
       <h3>ייבוא פריטים מאקסל</h3>
       <div class="hint">האפליקציה מזהה לבד באיזו עמודה המק״ט ובאיזו התיאור (לפי הכותרות "מק״ט" / "תיאור", ואם אין כותרות – לפי התוכן), ואפשר לתקן לפני הייבוא. ברירת מחדל: B = מק״ט, C = תיאור. מק״ט שכבר קיים לא ייכפל – התיאור שלו יתעדכן.</div>
@@ -6314,6 +6354,26 @@ document.addEventListener("click", async e => {
       S.items = S.items.filter(x => !ids.has(x.id)); if (S.mode !== "db") saveLocal();
       refreshDev(); render(); toast(`נמחקו ${b.length} פריטים שגויים – עכשיו ייבא את קובץ האקסל מחדש`); break;
     }
+    case "prune-xl": { const u = itemUsage(draft.pruneAlts !== false); await exportSheet("פריטים-למחיקה", "פריטים שלא בשימוש", ["מק״ט", "תיאור", "קטגוריה", "ספק", "יחידה"], u.drop.map(i => [i.sku, i.name, i.category || "", i.supplier || "", i.unit || ""]), true); break; }
+    case "prune-go": {
+      if (role() !== "dev") break;
+      const u = itemUsage(draft.pruneAlts !== false); if (!u.drop.length) break;
+      if (!t.dataset.armed) { t.dataset.armed = "1"; t.textContent = `לחץ שוב – ${u.drop.length.toLocaleString("he-IL")} פריטים יימחקו מהקטלוג`; t.classList.add("arm"); setTimeout(() => { if (t.isConnected) { delete t.dataset.armed; t.textContent = "🧹 מחק פריטים שלא בשימוש"; t.classList.remove("arm"); } }, 4000); break; }
+      const d0 = draft; d0.pruning = true; refreshDev();
+      try {
+        await autoSnapshot("wipe");
+        const ids = u.drop.map(i => i.id), set = new Set(ids);
+        if (S.mode === "db") {
+          if (db.deleteItems) await db.deleteItems(ids);
+          else for (const id of ids) await db.collection("items").doc(id).delete();
+        }
+        S.items = S.items.filter(i => !set.has(i.id)); if (S.mode !== "db") saveLocal();
+        logAct("ניקוי קטלוג – פריטים שלא בשימוש", `נמחקו ${ids.length} · נשארו ${S.items.length}`);
+        toast(`✔ נמחקו ${ids.length.toLocaleString("he-IL")} פריטים – בקטלוג נשארו ${S.items.length.toLocaleString("he-IL")}${db && db.pending && db.pending() ? ". השינוי נשלח לשרת ברקע – אל תסגור את הדף עד שלמעלה כתוב \"מסונכרן\"" : ""}`, 10000);
+      } catch (e2) { toast("הניקוי נעצר – נסה שוב (מחיקה חוזרת בטוחה)"); }
+      d0.pruning = false; if (draft === d0) refreshDev(); render();
+      break;
+    }
     case "imp-template": await downloadTemplate(); break;
     case "backup": await saveFile(`BOM-backup-${today()}.json`, JSON.stringify(backupObj(), null, 1)); break;
     case "snap-pick": S.snapSel = t.dataset.d; refreshDev(); break;
@@ -6671,6 +6731,7 @@ document.addEventListener("change", e => {
   }
   if (role() === "view" && !VIEW_INPUTS.has(t.id) && t.type !== "search") return;
   if (role() === "none") return;
+  if (t.id === "prune-alts" && draft) { draft.pruneAlts = t.checked; const sec = $("#prune-sec"); if (sec) sec.outerHTML = pruneSecHtml(); return; }
   if (t.id === "imp-file" && t.files[0]) { handleImportFile(t.files[0]); return; }
   if (t.id === "act-u" || t.id === "act-from" || t.id === "act-to") { S.actF = { ...(S.actF || {}), [t.id.slice(4) === "u" ? "u" : t.id.slice(4)]: t.value }; renderActivity(); return; }
   if ((t.id === "imp-colsku" || t.id === "imp-colname") && draft && draft.imp && draft.imp.rows) {
