@@ -781,7 +781,7 @@ nav.tabs button[aria-selected="true"]::before{background:rgba(255,255,255,.2);bo
 nav.tabs button[data-tab="order"]::after,nav.tabs button[data-tab="comp"]::after{content:"‹";position:absolute;inset-inline-end:-15px;color:var(--muted);font-weight:700;font-size:18px;pointer-events:none}
 nav.tabs button[data-tab="order"],nav.tabs button[data-tab="comp"]{position:relative;margin-inline-end:18px}
 nav.tabs button[data-tab="hist"]{margin-inline-start:auto}
-nav.tabs button[data-tab="hist"],nav.tabs button[data-tab="dash"],nav.tabs button[data-tab="stock"]{background:transparent;border-color:transparent;color:var(--muted)}
+nav.tabs button[data-tab="hist"],nav.tabs button[data-tab="dash"]{background:transparent;border-color:transparent;color:var(--muted)}
 nav.tabs button[data-tab="hist"]:hover,nav.tabs button[data-tab="dash"]:hover,nav.tabs button[data-tab="stock"]:hover{color:var(--ink);border-color:var(--line)}
 nav.tabs button[data-tab="hist"][aria-selected="true"],nav.tabs button[data-tab="dash"][aria-selected="true"],nav.tabs button[data-tab="stock"][aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
 .spaces{display:inline-flex;gap:4px;padding:4px;border-radius:12px;background:var(--ground);border:1px solid var(--line)}
@@ -1019,6 +1019,9 @@ nav.tabs button[data-tab="hist"][aria-selected="true"],nav.tabs button[data-tab=
 .mp-how summary::before{content:"ℹ";display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;margin-inline-end:8px}
 .mp-how ol{margin:8px 0 2px}
 @media (max-width:600px){.mc-row{grid-template-columns:44px minmax(0,1fr)}.mc-row .mc-cp{grid-column:1/-1}.mc-sub{display:none}}
+
+nav.tabs button[data-tab="stock"]{background:var(--accent-soft);border:1.5px solid var(--accent);color:var(--accent);font-weight:700}
+nav.tabs button[data-tab="stock"][aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
 </style>
 </head>
 <body>
@@ -1039,6 +1042,7 @@ nav.tabs button[data-tab="hist"][aria-selected="true"],nav.tabs button[data-tab=
       <span id="userchip"></span>
       <div class="onwrap" id="onwrap" hidden></div>
       <details class="hmenu" id="hmenu"><summary class="btn devbtn" aria-label="תפריט" title="אודות והגדרות">☰</summary><div class="hmenu-pop" role="menu">
+        <button class="btn ghost" data-tab="stock" role="menuitem" title="מלאי חי של פריטי הארונות מפריוריטי">📦 מלאי חי (פריוריטי)</button>
         <button class="btn ghost" data-act="about" role="menuitem" title="אודות האפליקציה ואיך מתפעלים אותה">ⓘ אודות האפליקציה</button>
         <button class="btn ghost" data-act="dev" id="devkey" role="menuitem" title="כלים: ייבוא, גיבוי, סנכרון, משתמשים וניקוי">⚙ מפתח · כלים והגדרות</button>
       </div></details>
